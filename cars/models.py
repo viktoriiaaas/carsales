@@ -1,11 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from simple_history.models import HistoricalRecords
 
 class Profile(AbstractUser):
     phone_num = models.CharField(max_length=20, blank=True, null=True)
 
-    # Уникальные related_name для устранения конфликтов
     groups = models.ManyToManyField(
         'auth.Group',
         related_name='profile_groups',
@@ -85,6 +84,8 @@ class Auto(TimeStamped):
     sell_status = models.ForeignKey(SellStatus, on_delete=models.SET_NULL, null=True, blank=True)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     main_photo = models.ImageField(upload_to='auto_photos/', blank=True, null=True)  # Главное фото автомобиля
+    
+    history = HistoricalRecords()  # Поле для хранения истории изменений
 
     def __str__(self):
         return f"{self.brand.name} {self.model} ({self.year})"
