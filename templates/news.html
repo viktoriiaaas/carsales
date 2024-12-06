@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новости</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            background-color: #f4f4f4;
+            padding: 15px;
+            text-align: center;
+        }
+        .news-list {
+            margin: 20px auto;
+            width: 90%;
+            max-width: 1200px;
+        }
+        .news-item {
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .news-item img {
+            margin-right: 20px;
+            max-width: 150px;
+            max-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Новости</h1>
+
+    <div class="news-list">
+        {% if news %}
+            {% for new in news %}
+            <div class="news-item">
+                {% if new.main_photo %}
+                    <img src="{{ new.main_photo.url }}" alt="Фото новости">
+                {% else %}
+                    <img src="{% static 'images/placeholder.jpg' %}" alt="Нет фото">
+                {% endif %}
+                <div>
+                    <h2>{{ new.title }}</h2>
+                    <p>{{ new.content|truncatewords:20 }}</p>
+                    <p><small>Опубликовано: {{ new.created_at|date:"d.m.Y H:i" }}</small></p>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>Новостей пока нет.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
