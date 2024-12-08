@@ -11,7 +11,6 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import viewsets, status
 
-# Главная страница с выводом автомобилей и фотографий
 def index(request):
     """Главная страница с выводом автомобилей и их фотографий"""
     autos = Auto.objects.all()[:10]  # Показываем первые 10 автомобилей
@@ -20,7 +19,8 @@ def index(request):
     for auto in autos:
         # Получаем связанные фотографии для каждого автомобиля
         photos = AutoPhoto.objects.filter(auto=auto).select_related('photo')
-        autos_with_photos.append({'auto': auto, 'photos': photos})
+        photo_urls = [ap.photo.url for ap in photos]  # Извлекаем только URL фотографий
+        autos_with_photos.append({'auto': auto, 'photo_urls': photo_urls})
 
     return render(request, 'index.html', {'autos_with_photos': autos_with_photos})
 

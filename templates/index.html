@@ -61,11 +61,14 @@
     </div>
 
     <div class="container">
+        <h2>Подобрали специально для вас:</h2>
         <div class="autos-list">
             {% for item in autos_with_photos %}
             <div class="auto-item">
                 {% if item.auto.main_photo %}
-                    <img src="{{ item.auto.main_photo.url }}" alt="Фото {{ item.auto.brand.name }}">
+                    <img src="{{ item.auto.main_photo.url }}" alt="Главное фото {{ item.auto.brand.name }}">
+                {% elif item.photo_urls %}
+                    <img src="{{ item.photo_urls.0 }}" alt="Фото {{ item.auto.brand.name }}">
                 {% else %}
                     <img src="{% static 'images/placeholder.jpg' %}" alt="Нет фото">
                 {% endif %}
@@ -78,6 +81,7 @@
             {% endfor %}
         </div>
     </div>
+    
 
 </body>
 </html>

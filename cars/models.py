@@ -92,13 +92,11 @@ class Auto(TimeStamped):
 
 
 class Photo(models.Model):
-    file_name = models.CharField(max_length=255)
-    file_path = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True) 
+    url = models.URLField(max_length=500)
+    description = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return self.file_name
-
+        return self.url or "No URL"
 
 class AutoPhoto(models.Model):
     auto = models.ForeignKey(Auto, on_delete=models.CASCADE)
