@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
-from cars.models import Auto
+from cars.models import Auto, AutoPhoto
 from django.db.models import Q
 import json
 from rest_framework import generics
@@ -11,11 +11,18 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import viewsets, status
 
-# Главная страница с выводом автомобилей
+# Главная страница с выводом автомобилей и фотографий
 def index(request):
-
+    """Главная страница с выводом автомобилей и их фотографий"""
     autos = Auto.objects.all()[:10]  # Показываем первые 10 автомобилей
-    return render(request, 'index.html', {'autos': autos})
+    autos_with_photos = []
+
+    for auto in autos:
+        # Получаем связанные фотографии для каждого автомобиля
+        photos = AutoPhoto.objects.filter(auto=auto).select_related('photo')
+        autos_with_photos.append({'auto': auto, 'photos': photos})
+
+    return render(request, 'index.html', {'autos_with_photos': autos_with_photos})
 
 # API для списка автомобилей с фильтрацией по статусу продажи
 class AutoListView(generics.ListAPIView):

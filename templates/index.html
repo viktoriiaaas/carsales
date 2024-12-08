@@ -21,29 +21,31 @@
             width: 90%;
             max-width: 1200px;
         }
-        .autos-list, .news-list {
+        .autos-list {
             margin-bottom: 40px;
         }
-        .auto-item, .news-item {
+        .auto-item {
             border: 1px solid #ddd;
             margin-bottom: 20px;
             padding: 15px;
             display: flex;
+            flex-direction: column;
             align-items: center;
         }
-        .auto-item img, .news-item img {
-            margin-right: 20px;
-            max-width: 150px;
-            max-height: 100px;
+        .auto-item img {
+            margin-bottom: 15px;
+            max-width: 300px;
+            max-height: 200px;
         }
         .link {
             text-align: center;
-            margin-top: 20px;
+            margin: 20px 0;
         }
         .link a {
             color: #007BFF;
             text-decoration: none;
             font-weight: bold;
+            font-size: 1.2em;
         }
         .link a:hover {
             text-decoration: underline;
@@ -54,35 +56,28 @@
 
     <h1>Автомобили</h1>
 
+    <div class="link">
+        <a href="{% url 'news_list' %}">Перейти к свежим новостям...</a>
+    </div>
+
     <div class="container">
-        <h2>Подобрали специально для вас:</h2>
         <div class="autos-list">
-            {% for auto in autos %}
+            {% for item in autos_with_photos %}
             <div class="auto-item">
-                {% if auto.main_photo %}
-                    <img src="{{ auto.main_photo.url }}" alt="Фото {{ auto.brand.name }}">
+                {% if item.auto.main_photo %}
+                    <img src="{{ item.auto.main_photo.url }}" alt="Фото {{ item.auto.brand.name }}">
                 {% else %}
                     <img src="{% static 'images/placeholder.jpg' %}" alt="Нет фото">
                 {% endif %}
                 <div>
-                    <h3>{{ auto.brand.name }} {{ auto.model }}</h3>
-                    <p>Год выпуска: {{ auto.year }}</p>
-                    <p>Цена: {{ auto.price }} ₽</p>
+                    <h3>{{ item.auto.brand.name }} {{ item.auto.model }}</h3>
+                    <p>Год выпуска: {{ item.auto.year }}</p>
+                    <p>Цена: {{ item.auto.price }} ₽</p>
                 </div>
             </div>
             {% endfor %}
         </div>
     </div>
 
-    <div class="link">
-        <a href="{% url 'news_list' %}">Перейти ко всем новостям...</a>
-    </div>
-
-    <div class="container">
-        <h2>Последние новости</h2>
-        <div class="news-list">
-            <p>Скоро добавим список новостей...</p>
-        </div>
-    </div>
 </body>
 </html>

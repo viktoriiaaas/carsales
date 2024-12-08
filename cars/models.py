@@ -94,7 +94,7 @@ class Auto(TimeStamped):
 class Photo(models.Model):
     file_name = models.CharField(max_length=255)
     file_path = models.CharField(max_length=255)
-    description = models.TextField(blank=True, null=True)  # Дополнительное описание фото
+    description = models.TextField(blank=True, null=True) 
 
     def __str__(self):
         return self.file_name

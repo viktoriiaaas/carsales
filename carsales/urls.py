@@ -25,7 +25,7 @@ urlpatterns = [
 
     # Используем класс AutoListView с методом as_view() для списка автомобилей
     path('api/autos/', AutoListView.as_view(), name='auto-list'),
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
