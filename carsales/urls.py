@@ -2,9 +2,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from news.views import FilteredNewsAPIView
 from cars.views import (
-    AutoListView, AutoViewSet,  BrandViewSet, ProfileViewSet, index, auto_create, auto_delete, auto_detail
+    AutoListView, AutoViewSet,  AutoSearchAPIView, BrandViewSet, ProfileViewSet, index, auto_create, auto_delete, auto_detail
 )
 
 from news import views as news_views
@@ -33,10 +32,10 @@ urlpatterns = [
 
     # Маршруты для приложения news
     path('news/', news_views.news_list, name='news_list'),
-    path('api/news/filtered-news/', FilteredNewsAPIView.as_view(), name='filtered-news'),
-
+    path('api/autos/search/', AutoSearchAPIView.as_view(), name='auto-search'),
     # REST API маршруты
     path('api/', include(router.urls)),
+
 
     # Используем класс AutoListView с методом as_view() для списка автомобилей
     path('api/autos/', AutoListView.as_view(), name='auto-list'),

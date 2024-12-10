@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseNotAllowed
 from cars.models import Auto, AutoPhoto
@@ -186,3 +186,9 @@ class AutoViewSet(viewsets.ModelViewSet):
             return Response({"error": f"Отсутствует поле: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": f"Ошибка сервера: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class AutoSearchAPIView(ListAPIView):
+    queryset = Auto.objects.all()
+    serializer_class = AutoSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['brand__name', 'model', 'description']
