@@ -11,29 +11,45 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ['id', 'username', 'email', 'phone_num', 'first_name', 'last_name']
 
+from rest_framework import serializers
+from .models import Auto, Brand, BodyType, EngineType, Color, Region, SellStatus, Profile
+
 class AutoSerializer(serializers.ModelSerializer):
-    brand = BrandSerializer(read_only=True)
-    profile = ProfileSerializer(read_only=True)
+    brand_id = serializers.PrimaryKeyRelatedField(
+        queryset=Brand.objects.all(),
+        source='brand',
+        write_only=True
+    )
+    body_type_id = serializers.PrimaryKeyRelatedField(
+        queryset=BodyType.objects.all(),
+        source='body_type',
+        write_only=True
+    )
+    engine_type_id = serializers.PrimaryKeyRelatedField(
+        queryset=EngineType.objects.all(),
+        source='engine_type',
+        write_only=True
+    )
+    color_id = serializers.PrimaryKeyRelatedField(
+        queryset=Color.objects.all(),
+        source='color',
+        write_only=True
+    )
+    region_id = serializers.PrimaryKeyRelatedField(
+        queryset=Region.objects.all(),
+        source='region',
+        write_only=True
+    )
+    sell_status_id = serializers.PrimaryKeyRelatedField(
+        queryset=SellStatus.objects.all(),
+        source='sell_status',
+        write_only=True
+    )
 
     class Meta:
         model = Auto
         fields = [
-            'id', 'brand', 'model', 'year', 'description', 'mileage', 
-            'price', 'body_type', 'engine_type', 'color', 'region', 
-            'sell_status', 'profile'
+            'id', 'brand', 'brand_id', 'model', 'year', 'description', 'mileage',
+            'price', 'body_type', 'body_type_id', 'engine_type', 'engine_type_id',
+            'color', 'color_id', 'region', 'region_id', 'sell_status', 'sell_status_id'
         ]
-
-    def validate_year(self, value):
-        if value < 1886 or value > 2024:
-            raise serializers.ValidationError("Год выпуска должен быть между 1886 и текущим годом.")
-        return value
-
-    def validate_mileage(self, value):
-        if value < 0:
-            raise serializers.ValidationError("Пробег не может быть отрицательным.")
-        return value
-
-    def validate_price(self, value):
-        if value <= 0:
-            raise serializers.ValidationError("Цена должна быть положительной.")
-        return value

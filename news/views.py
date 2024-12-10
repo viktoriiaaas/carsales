@@ -11,6 +11,7 @@ def news_list(request):
     news = New.objects.all().order_by('-created_at')  # Сортируем по полю created_at
     return render(request, 'news.html', {'news': news})
 
+
 class FilteredNewsAPIView(APIView):
     """Фильтрация новостей с использованием Q-запросов и APIView."""
 

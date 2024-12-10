@@ -5,6 +5,7 @@ from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseNotAll
 from cars.models import Auto, AutoPhoto
 from django.db.models import Q
 import json
+from cars.models import Auto, Brand, BodyType, EngineType, Color, Region, SellStatus, Profile
 from rest_framework import generics, viewsets, status
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
@@ -105,3 +106,67 @@ class AutoViewSet(viewsets.ModelViewSet):
             return Response({"message": "No luxury cars found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(luxury_cars, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @action(methods=['POST'], detail=False, url_path='create-auto')
+    def create_auto(self, request):
+        """
+        Метод для создания нового автомобиля через POST-запрос.
+        """
+        # Получение данных из тела запроса
+        data = request.data
+
+        try:
+            # Проверка пользователя
+            user = request.user
+            if not user.is_authenticated:
+                return Response({"error": "Вы должны быть авторизованы, чтобы создать автомобиль"}, status=status.HTTP_401_UNAUTHORIZED)
+
+            # Проверка связанного профиля
+            try:
+                profile = Profile.objects.get(id=user.id)
+            except Profile.DoesNotExist:
+                return Response({"error": "У текущего пользователя нет связанного профиля"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Получение связанных моделей
+            brand = Brand.objects.get(id=data.get("brand_id"))
+            body_type = BodyType.objects.get(id=data.get("body_type_id"))
+            engine_type = EngineType.objects.get(id=data.get("engine_type_id"))
+            color = Color.objects.get(id=data.get("color_id"))
+            region = Region.objects.get(id=data.get("region_id"))
+            sell_status = SellStatus.objects.get(id=data.get("sell_status_id"))
+
+            # Создание автомобиля
+            auto = Auto.objects.create(
+                brand=brand,
+                model=data.get("model"),
+                year=data.get("year"),
+                description=data.get("description", ""),
+                mileage=data.get("mileage"),
+                price=data.get("price"),
+                body_type=body_type,
+                engine_type=engine_type,
+                color=color,
+                region=region,
+                sell_status=sell_status,
+                profile=profile
+            )
+
+            serializer = AutoSerializer(auto)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except Brand.DoesNotExist:
+            return Response({"error": "Указанная марка не найдена"}, status=status.HTTP_400_BAD_REQUEST)
+        except BodyType.DoesNotExist:
+            return Response({"error": "Указанный тип кузова не найден"}, status=status.HTTP_400_BAD_REQUEST)
+        except EngineType.DoesNotExist:
+            return Response({"error": "Указанный тип двигателя не найден"}, status=status.HTTP_400_BAD_REQUEST)
+        except Color.DoesNotExist:
+            return Response({"error": "Указанный цвет не найден"}, status=status.HTTP_400_BAD_REQUEST)
+        except Region.DoesNotExist:
+            return Response({"error": "Указанный регион не найден"}, status=status.HTTP_400_BAD_REQUEST)
+        except SellStatus.DoesNotExist:
+            return Response({"error": "Указанный статус продажи не найден"}, status=status.HTTP_400_BAD_REQUEST)
+        except KeyError as e:
+            return Response({"error": f"Отсутствует поле: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": f"Ошибка сервера: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
