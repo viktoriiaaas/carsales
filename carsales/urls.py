@@ -3,7 +3,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from cars.views import (
-    AutoListView, AutoViewSet,  AutoSearchAPIView, BrandViewSet, ProfileViewSet, index, auto_create, auto_delete, auto_detail
+    AutoListView, AutoViewSet,  AutoFilterAPIView, AutoSearchAPIView, BrandViewSet, ProfileViewSet, index, auto_create, auto_delete, auto_detail
 )
 
 from news import views as news_views
@@ -25,6 +25,12 @@ urlpatterns = [
 
 
     # Маршруты для приложения cars
+
+    path('api/autos/', AutoListView.as_view(), name='auto-list'),
+    path('api/autos/filter/', AutoFilterAPIView.as_view(), name='auto-filter'),
+
+    path('api/autos/search/', AutoSearchAPIView.as_view(), name='auto-search'),
+
     path('api/autos/<int:pk>/', auto_detail, name='auto-detail'),
     path('api/autos/create/', auto_create, name='auto-create'),
     path('api/autos/<int:pk>/delete/', auto_delete, name='auto-delete'),
@@ -35,8 +41,7 @@ urlpatterns = [
     path('api/autos/search/', AutoSearchAPIView.as_view(), name='auto-search'),
     # REST API маршруты
     path('api/', include(router.urls)),
-
-
+    
     # Используем класс AutoListView с методом as_view() для списка автомобилей
     path('api/autos/', AutoListView.as_view(), name='auto-list'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

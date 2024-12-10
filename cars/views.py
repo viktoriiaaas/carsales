@@ -13,6 +13,35 @@ from .serializers import AutoSerializer
 from rest_framework import viewsets, status
 from .serializers import AutoSerializer, BrandSerializer, ProfileSerializer
 
+class AutoFilterAPIView(generics.ListAPIView):
+    """
+    API для фильтрации автомобилей.
+    """
+    queryset = Auto.objects.all()
+    serializer_class = AutoSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['brand__name', 'model', 'description']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        brand = self.request.GET.get('brand')
+        min_price = self.request.GET.get('min_price')
+        max_price = self.request.GET.get('max_price')
+        region = self.request.GET.get('region')
+        year = self.request.GET.get('year')
+
+        if brand:
+            queryset = queryset.filter(brand__name__icontains=brand)
+        if min_price:
+            queryset = queryset.filter(price__gte=min_price)
+        if max_price:
+            queryset = queryset.filter(price__lte=max_price)
+        if region:
+            queryset = queryset.filter(region__name__icontains=region)
+        if year:
+            queryset = queryset.filter(year=year)
+
+        return queryset
 
 def index(request):
     """Главная страница с выводом автомобилей и их фотографий"""
