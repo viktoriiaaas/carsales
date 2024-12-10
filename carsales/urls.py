@@ -4,7 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from news.views import FilteredNewsAPIView
 from cars.views import (
-    AutoListView, AutoViewSet, index, auto_create, auto_delete, auto_detail
+    AutoListView, AutoViewSet,  BrandViewSet, ProfileViewSet, index, auto_create, auto_delete, auto_detail
 )
 
 from news import views as news_views
@@ -14,6 +14,8 @@ from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r'autos', AutoViewSet, basename='autos')
+router.register(r'brands', BrandViewSet, basename='brands')
+router.register(r'profiles', ProfileViewSet, basename='profiles')
 
 urlpatterns = [
     # Главная страница

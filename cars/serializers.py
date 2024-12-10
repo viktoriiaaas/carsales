@@ -1,18 +1,18 @@
 from rest_framework import serializers
-from .models import Auto, Brand, Profile
+from .models import Auto, Brand, BodyType, EngineType, Color, Region, SellStatus, Profile
+
 
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
         fields = ['id', 'name']
 
+
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['id', 'username', 'email', 'phone_num', 'first_name', 'last_name']
 
-from rest_framework import serializers
-from .models import Auto, Brand, BodyType, EngineType, Color, Region, SellStatus, Profile
 
 class AutoSerializer(serializers.ModelSerializer):
     brand_id = serializers.PrimaryKeyRelatedField(

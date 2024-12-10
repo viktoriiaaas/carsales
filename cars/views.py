@@ -10,6 +10,8 @@ from rest_framework import generics, viewsets, status
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
 from .serializers import AutoSerializer
+from rest_framework import viewsets, status
+from .serializers import AutoSerializer, BrandSerializer, ProfileSerializer
 
 
 def index(request):
@@ -67,6 +69,20 @@ class AutoListView(generics.ListAPIView):
             return Auto.objects.filter(sell_status=sell_status)
         return Auto.objects.all()
   
+class BrandViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet для работы с марками автомобилей.
+    """
+    queryset = Brand.objects.all()
+    serializer_class = BrandSerializer
+
+class ProfileViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet для работы с профилями пользователей.
+    """
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
+
 class AutoViewSet(viewsets.ModelViewSet):
     queryset = Auto.objects.all()
     serializer_class = AutoSerializer
