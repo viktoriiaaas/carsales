@@ -1,15 +1,49 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseNotAllowed
 from cars.models import Auto, AutoPhoto
 from django.db.models import Q
 import json
-from rest_framework import generics
-from rest_framework.permissions import IsAuthenticated
-from .serializers import AutoSerializer
+from rest_framework import generics, viewsets, status
 from rest_framework.filters import SearchFilter
-from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from .serializers import AutoSerializer
+
+
+def filter_cars(request):
+    """
+    Фильтрация автомобилей с использованием Q-запросов (OR, AND, NOT).
+    """
+    print("Filter cars function accessed")
+    print("Request parameters:", request.GET)
+
+    # Получаем параметры из запроса
+    brand = request.GET.get('brand')  # Параметр "Марка автомобиля"
+    year_min = request.GET.get('year_min')  # Минимальный год выпуска
+    year_max = request.GET.get('year_max')  # Максимальный год выпуска
+    exclude_status = request.GET.get('exclude_status')  # Исключить статус продажи
+    mileage_max = request.GET.get('mileage_max')  # Максимальный пробег
+
+    # Формируем фильтр с использованием OR, AND и NOT
+    filters = Q()
+    if brand:
+        filters |= Q(brand__name__iexact=brand)  # OR: автомобили указанной марки
+    if year_min:
+        filters &= Q(year__gte=int(year_min))  # AND: год >= year_min
+    if year_max:
+        filters &= Q(year__lte=int(year_max))  # AND: год <= year_max
+    if exclude_status:
+        filters &= ~Q(sell_status__name__iexact=exclude_status)  # NOT: исключить статус
+    if mileage_max:
+        filters &= Q(mileage__lte=int(mileage_max))  # AND: пробег <= mileage_max
+
+    cars = Auto.objects.filter(filters)
+    if not cars.exists():
+        return JsonResponse({"error": "No cars match the given filters"}, status=404)
+
+    serializer = AutoSerializer(cars, many=True)
+    return JsonResponse(serializer.data, safe=False)
+
 
 def index(request):
     """Главная страница с выводом автомобилей и их фотографий"""
@@ -17,28 +51,13 @@ def index(request):
     autos_with_photos = []
 
     for auto in autos:
-        # Получаем связанные фотографии для каждого автомобиля
+        # Получаем связанные фотографии через AutoPhoto
         photos = AutoPhoto.objects.filter(auto=auto).select_related('photo')
-        photo_urls = [ap.photo.url for ap in photos]  # Извлекаем только URL фотографий
-        autos_with_photos.append({'auto': auto, 'photo_urls': photo_urls})
+        autos_with_photos.append({'auto': auto, 'photos': photos})
 
     return render(request, 'index.html', {'autos_with_photos': autos_with_photos})
 
-# API для списка автомобилей с фильтрацией по статусу продажи
-class AutoListView(generics.ListAPIView):
-    queryset = Auto.objects.all()
-    serializer_class = AutoSerializer
-    filter_backends = [SearchFilter]  # Добавляем SearchFilter
-    search_fields = ['brand__name', 'model', 'description']  # Указываем поля, по которым будет выполняться поиск
-    serializer_class = AutoSerializer
 
-    def get_queryset(self):
-        sell_status = self.request.GET.get('sell_status')
-        if sell_status:
-            return Auto.objects.filter(sell_status=sell_status)
-        return Auto.objects.all()
-
-# Детальная информация об автомобиле
 def auto_detail(request, pk):
     if request.method == "GET":
         auto = get_object_or_404(Auto, pk=pk)
@@ -47,7 +66,7 @@ def auto_detail(request, pk):
     else:
         return HttpResponseNotAllowed(['GET'])
 
-# Создание нового автомобиля
+
 def auto_create(request):
     if request.method == "POST":
         try:
@@ -62,7 +81,7 @@ def auto_create(request):
     else:
         return HttpResponseNotAllowed(['POST'])
 
-# Удаление автомобиля
+
 def auto_delete(request, pk):
     if request.method == "DELETE":
         auto = get_object_or_404(Auto, pk=pk)
@@ -71,61 +90,18 @@ def auto_delete(request, pk):
     else:
         return HttpResponseNotAllowed(['DELETE'])
 
-# Фильтрация автомобилей с использованием Q объектов
-def filtered_autos(request):
-    autos = Auto.objects.filter(
-        (Q(brand__name='BMW') | Q(year__gt=2015)) &  
-        Q(mileage__lt=100000) &                      
-        ~Q(sell_status__name='Продан')               
-    )
-    serializer = AutoSerializer(autos, many=True)
-    return JsonResponse(serializer.data, safe=False)
 
-# Фильтрация по году выпуска через GET-параметр year
-def filter_autos_by_year(request):
-    year = request.GET.get('year')
-    if year:
-        autos = Auto.objects.filter(year=year)
-    else:
-        autos = Auto.objects.all()
-    serializer = AutoSerializer(autos, many=True)
-    return JsonResponse(serializer.data, safe=False)
-
-# Фильтрация по региону (именованные аргументы в URL)
-def filter_autos_by_region(request, region_id):
-    autos = Auto.objects.filter(region__id=region_id)
-    serializer = AutoSerializer(autos, many=True)
-    return JsonResponse(serializer.data, safe=False)
-
-# Фильтрация по диапазону годов выпуска
-def filter_autos_by_year_range(request):
-    year_min = request.GET.get('year_min')
-    year_max = request.GET.get('year_max')
-    autos = Auto.objects.all()
-    if year_min:
-        autos = autos.filter(year__gte=year_min)
-    if year_max:
-        autos = autos.filter(year__lte=year_max)
-    serializer = AutoSerializer(autos, many=True)
-    return JsonResponse(serializer.data, safe=False)
-
-# Фильтрация по текущему аутентифицированному пользователю
-class UserAutosListView(generics.ListAPIView):
+class AutoListView(generics.ListAPIView):
+    queryset = Auto.objects.all()
     serializer_class = AutoSerializer
-    permission_classes = [IsAuthenticated]
+    filter_backends = [SearchFilter]
+    search_fields = ['brand__name', 'model', 'description']
 
     def get_queryset(self):
-        return Auto.objects.filter(profile=self.request.user)
-
-# Фильтрация по цвету автомобиля через GET-параметр color
-def filter_autos_by_color(request):
-    color = request.GET.get('color')
-    if color:
-        autos = Auto.objects.filter(color__name__iexact=color)
-    else:
-        autos = Auto.objects.all()
-    serializer = AutoSerializer(autos, many=True)
-    return JsonResponse(serializer.data, safe=False)
+        sell_status = self.request.GET.get('sell_status')
+        if sell_status:
+            return Auto.objects.filter(sell_status=sell_status)
+        return Auto.objects.all()
 
 
 class AutoViewSet(viewsets.ModelViewSet):
@@ -134,14 +110,12 @@ class AutoViewSet(viewsets.ModelViewSet):
 
     @action(methods=['get'], detail=False, url_path='in-stock-autos')
     def in_stock_autos(self, request):
-        """Метод для получения списка автомобилей в наличии"""
         in_stock_autos = Auto.objects.filter(sell_status__name='В наличии')
         serializer = self.get_serializer(in_stock_autos, many=True)
         return Response(serializer.data)
 
     @action(methods=['post'], detail=True, url_path='update-price')
     def update_price(self, request, pk=None):
-        """Метод для обновления цены конкретного автомобиля"""
         auto = self.get_object()
         new_price = request.data.get('price')
 

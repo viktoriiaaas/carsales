@@ -63,23 +63,18 @@
     <div class="container">
         <h2>Подобрали специально для вас:</h2>
         <div class="autos-list">
-            {% for item in autos_with_photos %}
-            <div class="auto-item">
-                {% if item.auto.main_photo %}
-                    <img src="{{ item.auto.main_photo.url }}" alt="Главное фото {{ item.auto.brand.name }}">
-                {% elif item.photo_urls %}
-                    <img src="{{ item.photo_urls.0 }}" alt="Фото {{ item.auto.brand.name }}">
-                {% else %}
-                    <img src="{% static 'images/placeholder.jpg' %}" alt="Нет фото">
-                {% endif %}
-                <div>
-                    <h3>{{ item.auto.brand.name }} {{ item.auto.model }}</h3>
-                    <p>Год выпуска: {{ item.auto.year }}</p>
-                    <p>Цена: {{ item.auto.price }} ₽</p>
-                </div>
-            </div>
-            {% endfor %}
+            {% for auto_data in autos_with_photos %}
+<div class="auto-item">
+    <h3>{{ auto_data.auto.brand.name }} {{ auto_data.auto.model }}</h3>
+    <p>Год выпуска: {{ auto_data.auto.year }}</p>
+    <p>Цена: {{ auto_data.auto.price|floatformat:0 }} ₽</p>
+    {% for photo in auto_data.photos %}
+        <img src="{{ photo.photo.url }}" alt="Фото {{ auto_data.auto.brand.name }}">
+    {% endfor %}
+</div>
+{% endfor %}
         </div>
+        
     </div>
     
 
