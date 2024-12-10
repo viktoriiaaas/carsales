@@ -1,17 +1,15 @@
 from rest_framework import serializers
-from .models import Profile, Auto, Brand
-
-class ProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Profile
-        fields = ['id', 'username', 'email', 'phone_num', 'first_name', 'last_name']
-
+from .models import Auto, Brand, Profile
 
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
         fields = ['id', 'name']
 
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['id', 'username', 'email', 'phone_num', 'first_name', 'last_name']
 
 class AutoSerializer(serializers.ModelSerializer):
     brand = BrandSerializer(read_only=True)
@@ -20,9 +18,9 @@ class AutoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Auto
         fields = [
-            'id', 'brand', 'model', 'year', 'price', 'mileage',
-            'profile', 'body_type', 'engine_type', 'color', 
-            'region', 'sell_status'
+            'id', 'brand', 'model', 'year', 'description', 'mileage', 
+            'price', 'body_type', 'engine_type', 'color', 'region', 
+            'sell_status', 'profile'
         ]
 
     def validate_year(self, value):
