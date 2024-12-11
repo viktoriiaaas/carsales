@@ -44,7 +44,7 @@ class AutoFilterAPIView(generics.ListAPIView):
         return queryset
 
 def index(request):
-    """Главная страница с выводом автомобилей и их фотографий"""
+
     autos = Auto.objects.all()[:10]
     autos_with_photos = [
         {"auto": auto, "photos": AutoPhoto.objects.filter(auto=auto)}
@@ -125,9 +125,9 @@ class AutoViewSet(viewsets.ModelViewSet):
         - Год выпуска начиная с 2015
         """
         recommended_cars = Auto.objects.filter(
-            (Q(brand__name__icontains="BMW") | Q(brand__name__icontains="Mercedes-Benz")) &  # OR
-            ~Q(price__gte=5000000) &  # NOT
-            Q(year__gte=2015)  # AND
+            (Q(brand__name__icontains="BMW") | Q(brand__name__icontains="Mercedes-Benz")) &  # или
+            ~Q(price__gte=5000000) &  # не
+            Q(year__gte=2015)  # и
         )
         if not recommended_cars.exists():
             return Response({"message": "No recommended cars found"}, status=status.HTTP_404_NOT_FOUND)
@@ -216,6 +216,7 @@ class AutoViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({"error": f"Ошибка сервера: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+# поиск по содержанию
 class AutoSearchAPIView(ListAPIView):
     queryset = Auto.objects.all()
     serializer_class = AutoSerializer

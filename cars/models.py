@@ -78,8 +78,8 @@ class Region(models.Model):
     name = models.CharField(max_length=255, unique=True)
 
     class Meta:
-        verbose_name = "Местоположение"
-
+        verbose_name_plural = "Местоположение"
+        
     def __str__(self):
         return self.name
 

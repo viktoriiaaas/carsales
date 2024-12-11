@@ -22,11 +22,8 @@ urlpatterns = [
 
     # Админка
     path('admin/', admin.site.urls),
-
-
-    # Маршруты для приложения cars
-
     path('api/autos/', AutoListView.as_view(), name='auto-list'),
+
     path('api/autos/filter/', AutoFilterAPIView.as_view(), name='auto-filter'),
 
     path('api/autos/search/', AutoSearchAPIView.as_view(), name='auto-search'),
@@ -39,7 +36,7 @@ urlpatterns = [
     # Маршруты для приложения news
     path('news/', news_views.news_list, name='news_list'),
     path('api/autos/search/', AutoSearchAPIView.as_view(), name='auto-search'),
-    # REST API маршруты
+
     path('api/', include(router.urls)),
     
     # Используем класс AutoListView с методом as_view() для списка автомобилей
