@@ -109,7 +109,7 @@ class Auto(TimeStamped):
     # on_delete=models.PROTECT предотвращает удаление бренда, если он связан с автомобилем
     description = models.TextField()
     model = models.CharField(max_length=255)
-    year = models.IntegerField()
+    year = models.IntegerField(verbose_name="Год выпуска")
     mileage = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=0) # кол-во знаков после запятой
     body_type = models.ForeignKey(BodyType, on_delete=models.PROTECT)

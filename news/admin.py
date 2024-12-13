@@ -48,7 +48,7 @@ class NewAdmin(ExportMixin, admin.ModelAdmin):
     )
 
 
-# Админка для категории новостей
+# админка для категории новостей
 class NewCategoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
     search_fields = ('name',)
