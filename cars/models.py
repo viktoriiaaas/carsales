@@ -4,24 +4,32 @@ from django.contrib.auth.models import AbstractUser
 
 
 class Profile(AbstractUser):
+
+# уже есть основные поля для пользователя:
+# username (логин),
+# password (пароль),
+# email,
+# first_name и last_name (имя и фамилия),
+# is_staff, is_superuser
+
     phone_num = models.CharField(max_length=20, blank=True, null=True)
 
     groups = models.ManyToManyField(
         'auth.Group',
         related_name='profile_groups',
-        blank=True,
+        blank=True, # пользователь может быть без групп (группы необязательны)
     )
-    user_permissions = models.ManyToManyField(
-        'auth.Permission',
+    user_permissions = models.ManyToManyField( 
+        'auth.Permission', # user_permissions связывает пользователя с правами доступа 'auth.Permission'
         related_name='profile_permissions',
-        blank=True,
+        blank=True, # пользователь может быть без специальных прав (по умолчанию)
     )
 
     class Meta:
         verbose_name_plural = "Пользователи"
     
     def __str__(self):
-        return f"{self.username} ({self.first_name} {self.last_name})"
+        return f"{self.username} ({self.first_name} {self.last_name})" #user (alexander alexander)
 
 
 class Brand(models.Model):
@@ -88,23 +96,29 @@ class TimeStamped(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # django автоматически задаст значение этого поля при создании объекта. 
+    # после этого его нельзя изменить
+
     class Meta:
-        abstract = True
+        abstract = True 
+
 
 
 class Auto(TimeStamped):
-    brand = models.ForeignKey(Brand, on_delete=models.PROTECT)
+    brand = models.ForeignKey(Brand, on_delete=models.PROTECT) 
+    # on_delete=models.PROTECT предотвращает удаление бренда, если он связан с автомобилем
     description = models.TextField()
     model = models.CharField(max_length=255)
     year = models.IntegerField()
     mileage = models.IntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=0)
+    price = models.DecimalField(max_digits=10, decimal_places=0) # кол-во знаков после запятой
     body_type = models.ForeignKey(BodyType, on_delete=models.PROTECT)
     engine_type = models.ForeignKey(EngineType, on_delete=models.PROTECT)
     color = models.ForeignKey(Color, on_delete=models.CASCADE)
     region = models.ForeignKey(Region, on_delete=models.CASCADE)
-    sell_status = models.ForeignKey(SellStatus, on_delete=models.SET_NULL, null=True, blank=True)
+    sell_status = models.ForeignKey(SellStatus, on_delete=models.PROTECT, null=True, blank=True)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    # on_delete=models.CASCADE удаляет автомобиль, если связанный пользователь удалён
 
     history = HistoricalRecords()
 
@@ -117,13 +131,13 @@ class Auto(TimeStamped):
 
 class Photo(models.Model):
     url = models.URLField(max_length=700)
-    description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=False, null=False) # описание = название
 
     class Meta:
         verbose_name_plural = "Фото"
 
     def __str__(self):
-        return self.description or self.url
+        return self.description 
 
 
 class AutoPhoto(models.Model):

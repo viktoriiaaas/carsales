@@ -143,9 +143,9 @@ class AutoViewSet(viewsets.ModelViewSet):
         - Доступны только в регионе "Москва"
         """
         luxury_cars = Auto.objects.filter(
-            (Q(brand__name__icontains="Porsche") | Q(brand__name__icontains="Lexus")) &  # OR
-            ~Q(mileage__gte=100000) &  # NOT
-            Q(region__name__icontains="Москва")  # AND
+            (Q(brand__name__icontains="Porsche") | Q(brand__name__icontains="Lexus")) &  # или
+            ~Q(mileage__gte=100000) &  # не
+            Q(region__name__icontains="Москва")  # и
         )
         if not luxury_cars.exists():
             return Response({"message": "No luxury cars found"}, status=status.HTTP_404_NOT_FOUND)

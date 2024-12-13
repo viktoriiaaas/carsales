@@ -10,15 +10,15 @@ class BrandSerializer(serializers.ModelSerializer):
         # валидация бренда
     def validate_name(self, value):
         
-        # Проверка на отсутствие лишних знаков
+        # проверка на отсутствие лишних знаков
         if '.' in value:
             raise serializers.ValidationError("Название бренда не должно содержать лишних символов.")
     
-        # Проверка на латиницу
+        # проверка на латиницу
         if not re.match(r'^[a-zA-Z\s]+$', value):
             raise serializers.ValidationError("Название бренда должно быть только на латинице.")
         
-        # Проверка минимальной длины
+        # проверка минимальной длины
         if len(value) < 2:
             raise serializers.ValidationError("Название бренда должно быть не менее двух символов.")
     

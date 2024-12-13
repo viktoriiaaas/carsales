@@ -22,7 +22,7 @@ class New(TimeStamped):
     title = models.CharField(max_length=255)
     content = models.TextField()
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    category = models.ForeignKey(NewCategory, on_delete=models.SET_NULL, null=True)
+    category = models.ForeignKey(NewCategory, on_delete=models.PROTECT, null=True)
 
     class Meta:
         ordering = ['-created_at']
