@@ -103,7 +103,6 @@ class TimeStamped(models.Model):
         abstract = True 
 
 
-
 class Auto(TimeStamped):
     brand = models.ForeignKey(Brand, on_delete=models.PROTECT) 
     # on_delete=models.PROTECT предотвращает удаление бренда, если он связан с автомобилем

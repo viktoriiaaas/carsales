@@ -13,6 +13,12 @@ from .serializers import AutoSerializer
 from rest_framework import viewsets, status
 from .serializers import AutoSerializer, BrandSerializer, ProfileSerializer
 
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.exceptions import NotFound
+from rest_framework.generics import ListAPIView
+from cars.models import Auto
+from cars.serializers import AutoSerializer
+
 class AutoFilterAPIView(generics.ListAPIView):
     """
     API для фильтрации автомобилей.
@@ -222,3 +228,43 @@ class AutoSearchAPIView(ListAPIView):
     serializer_class = AutoSerializer
     filter_backends = [SearchFilter]
     search_fields = ['brand__name', 'model', 'description']
+
+
+### пагинация
+class CustomPagination(PageNumberPagination):
+    """
+    Кастомный класс пагинации с обработкой ошибок.
+    """
+    page_size = 3  # Количество объектов на одной странице
+    
+    def get_paginated_response(self, data):
+        """
+        Формируем кастомный ответ для клиента.
+        """
+        return Response({
+            'links': {
+                'next': self.get_next_link(),
+                'previous': self.get_previous_link()
+            },
+            'count': self.page.paginator.count,
+            'total_pages': self.page.paginator.num_pages,
+            'current_page': self.page.number,
+            'results': data
+        })
+    
+    def paginate_queryset(self, queryset, request, view=None):
+        """
+        Обработка ошибок для несуществующих страниц
+        """
+        try:
+            return super().paginate_queryset(queryset, request, view=view)
+        except NotFound:
+            raise NotFound("Неверный запрос: страницы с таким номером не существует.")
+        
+class AutoListView(ListAPIView):
+    """
+    API для получения списка автомобилей с пагинацией.
+    """
+    queryset = Auto.objects.all()
+    serializer_class = AutoSerializer
+    pagination_class = CustomPagination

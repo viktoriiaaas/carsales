@@ -1,6 +1,6 @@
 from django.db import models
-from cars.models import Profile, Photo
-
+from cars.models import Profile
+from django.utils.timezone import now
 
 class NewCategory(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -11,12 +11,14 @@ class NewCategory(models.Model):
     def __str__(self):
         return self.name
 
+
 class TimeStamped(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         abstract = True
+
 
 class New(TimeStamped):
     title = models.CharField(max_length=255)
@@ -34,10 +36,11 @@ class New(TimeStamped):
 
 class NewPhoto(models.Model):
     new = models.ForeignKey(New, on_delete=models.CASCADE, related_name="new_photos")
-    photo = models.ForeignKey(Photo, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='news_photos/')  # поле для хранения картинок
+    description = models.TextField(blank=True, null=True)
 
     class Meta:
         verbose_name_plural = "Фото для новости"
 
     def __str__(self):
-        return f"{self.new.title} - {self.photo.description or 'Фото'}"
+        return f"{self.new.title} - {self.description or 'Фото'}"

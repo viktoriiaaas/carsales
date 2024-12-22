@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Новости</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -51,7 +53,7 @@
                 {% if new.new_photos.all %}
                     <div>
                         {% for photo in new.new_photos.all %}
-                            <img src="{{ photo.photo.url }}" alt="{{ photo.photo.description }}">
+                            <img src="{{ photo.image.url }}" alt="{{ photo.description }}">
                         {% endfor %}
                     </div>
                 {% endif %}
