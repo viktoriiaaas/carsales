@@ -9,6 +9,7 @@ from cars.views import (
 from news import views as news_views
 
 from rest_framework.routers import DefaultRouter
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 
 router = DefaultRouter()
@@ -17,6 +18,16 @@ router.register(r'brands', BrandViewSet, basename='brands')
 router.register(r'profiles', ProfileViewSet, basename='profiles')
 
 urlpatterns = [
+
+    # Схема API
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    
+    # Swagger UI
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    
+    # Redoc (альтернативная документация)
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    
     # Главная страница
     path('', index, name='index'),
 

@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'simple_history',
     'import_export',
     'django_extensions',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -108,6 +109,7 @@ USE_TZ = True
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'PAGE_SIZE': 3,  # количество объектов на одну страницу
 }
 
@@ -123,3 +125,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'carsales',
+    'DESCRIPTION': 'Документация',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False, # опционально, отключить автосоздание схемы
+}
