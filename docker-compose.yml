@@ -1,0 +1,46 @@
+version: "3.10"
+
+services:
+  web:
+    build: . # build определяет требования к сборке образа контейнера службы.
+    command: python manage.py runserver 0.0.0.0:8000 #command: переопределяет команду контейнера, используемую по умолчанию
+    ports:
+      - "8000:8000" # привязываем порт 8000 на хосте к порту 8000 в контейнере
+    volumes:
+      - .:/app # связываем локальные файлы с контейнером
+    depends_on:
+      - redis # зависимость от брокера сообщений
+      - celery
+    environment:
+      - DJANGO_SETTINGS_MODULE=carsales.settings # указываем настройки Django
+
+  redis:
+    image: redis:alpine # используем образ Redis (брокер сообщений)
+    ports:
+      - "6379:6379" # связываем порт Redis
+
+  celery:
+    build: .
+    command: celery -A carsales worker -l info
+    depends_on:
+      - redis # celery должен ждать запуска Redis
+    environment:
+      - DJANGO_SETTINGS_MODULE=carsales.settings
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+
+  celerybeat:
+    build: .
+    command: celery -A carsales beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    depends_on:
+      - redis
+    environment:
+      - DJANGO_SETTINGS_MODULE=carsales.settings
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+  
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "2525:1025" # SMTP порт
+      - "8026:8025" # веб-интерфейс Mailhog (переносим на порт 8026, чтобы избежать конфликта)

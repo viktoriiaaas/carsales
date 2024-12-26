@@ -12,13 +12,16 @@ from rest_framework.decorators import action
 from .serializers import AutoSerializer
 from rest_framework import viewsets, status
 from .serializers import AutoSerializer, BrandSerializer, ProfileSerializer
-
+from django.core.cache import cache
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView
 from cars.models import Auto
 from cars.serializers import AutoSerializer
-
+from django.http import JsonResponse
+from django.core.cache import cache
+from django.core.mail import send_mail
+from django.http import HttpResponse
 class AutoFilterAPIView(generics.ListAPIView):
     """
     API для фильтрации автомобилей.
@@ -230,12 +233,12 @@ class AutoSearchAPIView(ListAPIView):
     search_fields = ['brand__name', 'model', 'description']
 
 
-### пагинация
+# пагинация
 class CustomPagination(PageNumberPagination):
     """
     Кастомный класс пагинации с обработкой ошибок.
     """
-    page_size = 3  # Количество объектов на одной странице
+    page_size = 3  # количество объектов на одной странице
     
     def get_paginated_response(self, data):
         """
@@ -268,3 +271,58 @@ class AutoListView(ListAPIView):
     queryset = Auto.objects.all()
     serializer_class = AutoSerializer
     pagination_class = CustomPagination
+
+def get_cached_autos():
+    cache_key = "autos_list"  # уникальный ключ для кеша
+    autos = cache.get(cache_key)  # пробуем получить данные из кеша
+
+    if autos is None:  # если данных нет в кеше
+        print("Данные извлекаются из базы данных...")
+        autos = list(Auto.objects.select_related('brand', 'body_type', 'engine_type').all())
+        cache.set(cache_key, autos, timeout=60 * 15)  # сохраняем данные в кеш на 15 минут
+    else:
+        print("Данные получены из кеша.")
+
+    return autos
+
+def autos_list_view(request):
+    # уникальный ключ для кеша
+    cache_key = "autos_list"
+
+    # попробуем получить данные из кеша
+    autos = cache.get(cache_key)
+
+    if autos is None:
+        # если данных нет в кеше, извлекаем их из базы данных
+        print("Данные извлекаются из базы данных...")
+        autos = list(Auto.objects.select_related('brand', 'body_type', 'engine_type').all())
+        cache.set(cache_key, autos, timeout=60 * 15)  # сохраняем данные в кеш на 15 минут
+    else:
+        print("Данные получены из кеша.")
+
+    # Формируем данные для ответа
+    data = [
+        {
+            "id": auto.id,
+            "brand": auto.brand.name,
+            "model": auto.model,
+            "year": auto.year,
+            "price": float(auto.price),
+        }
+        for auto in autos
+    ]
+
+    return JsonResponse(data, safe=False)
+
+# mailhog
+def send_test_email(request):
+    subject = "Тестовое письмо"
+    message = "Это тестовое письмо отправлено через Mailhog."
+    from_email = "test@example.com"
+    recipient_list = ["recipient@example.com"] 
+    
+    try:
+        send_mail(subject, message, from_email, recipient_list)
+        return HttpResponse("Тестовое письмо успешно отправлено!")
+    except Exception as e:
+        return HttpResponse(f"Ошибка отправки письма: {e}")

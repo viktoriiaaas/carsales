@@ -1,6 +1,8 @@
 from django.db import models
 from simple_history.models import HistoricalRecords
 from django.contrib.auth.models import AbstractUser
+from django.utils.timezone import now  # Исправление: импортируем `now`
+from datetime import timedelta 
 
 
 class Profile(AbstractUser):
@@ -31,6 +33,24 @@ class Profile(AbstractUser):
     def __str__(self):
         return f"{self.username} ({self.first_name} {self.last_name})" #user (alexander alexander)
 
+class GoogleOAuthProfile(models.Model):
+    user = models.ForeignKey(
+        'cars.Profile',  # cсылка на модель пользователя
+        on_delete=models.CASCADE,
+        related_name='google_oauth_profiles'
+    )
+    google_user_id = models.CharField(max_length=255, unique=True)  # ID пользователя Google
+    access_token = models.TextField()  # access Token
+    refresh_token = models.TextField()  # refresh Token
+    token_expiry = models.DateTimeField(default=lambda: now() + timedelta(hours=1))  # cрок действия токена
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "Профили Google OAuth"
+
+    def __str__(self):
+        return f"GoogleOAuthProfile({self.user.username})"
 
 class Brand(models.Model):
     name = models.CharField(max_length=255, unique=True)

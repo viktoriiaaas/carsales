@@ -50,9 +50,34 @@
         .link a:hover {
             text-decoration: underline;
         }
+        .navbar {
+            background-color: #007BFF;
+            padding: 10px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
+    <div class="navbar">
+        <div>avto.ru</div>
+        <div>
+            {% if user.is_authenticated %}
+                Здравствуйте, {{ user.first_name }}!
+                <a href="{% url 'account_logout' %}">(Выйти)</a>
+            {% else %}
+                <a href="{% url 'account_login' %}">Войти</a> | 
+                <a href="{% url 'account_signup' %}">Зарегистрироваться</a>
+            {% endif %}
+        </div>
+    </div>
 
     <h1>Автомобили</h1>
 
@@ -64,19 +89,17 @@
         <h2>Подобрали специально для вас:</h2>
         <div class="autos-list">
             {% for auto_data in autos_with_photos %}
-<div class="auto-item">
-    <h3>{{ auto_data.auto.brand.name }} {{ auto_data.auto.model }}</h3>
-    <p>Год выпуска: {{ auto_data.auto.year }}</p>
-    <p>Цена: {{ auto_data.auto.price|floatformat:0 }} ₽</p>
-    {% for photo in auto_data.photos %}
-        <img src="{{ photo.photo.url }}" alt="Фото {{ auto_data.auto.brand.name }}">
-    {% endfor %}
-</div>
-{% endfor %}
+            <div class="auto-item">
+                <h3>{{ auto_data.auto.brand.name }} {{ auto_data.auto.model }}</h3>
+                <p>Год выпуска: {{ auto_data.auto.year }}</p>
+                <p>Цена: {{ auto_data.auto.price|floatformat:0 }} ₽</p>
+                {% for photo in auto_data.photos %}
+                    <img src="{{ photo.photo.url }}" alt="Фото {{ auto_data.auto.brand.name }}">
+                {% endfor %}
+            </div>
+            {% endfor %}
         </div>
         
     </div>
-    
-
 </body>
 </html>
