@@ -2,17 +2,17 @@ version: "3.10"
 
 services:
   web:
-    build: . # build определяет требования к сборке образа контейнера службы.
-    command: python manage.py runserver 0.0.0.0:8000 #command: переопределяет команду контейнера, используемую по умолчанию
+    build: . 
+    command: python manage.py runserver 0.0.0.0:8000 
     ports:
-      - "8000:8000" # привязываем порт 8000 на хосте к порту 8000 в контейнере
+      - "8000:8000" 
     volumes:
-      - .:/app # связываем локальные файлы с контейнером
+      - .:/app 
     depends_on:
-      - redis # зависимость от брокера сообщений
+      - redis 
       - celery
     environment:
-      - DJANGO_SETTINGS_MODULE=carsales.settings # указываем настройки Django
+      - DJANGO_SETTINGS_MODULE=carsales.settings
 
   redis:
     image: redis:alpine # используем образ Redis (брокер сообщений)
@@ -23,7 +23,7 @@ services:
     build: .
     command: celery -A carsales worker -l info
     depends_on:
-      - redis # celery должен ждать запуска Redis
+      - redis 
     environment:
       - DJANGO_SETTINGS_MODULE=carsales.settings
       - CELERY_BROKER_URL=redis://redis:6379/0

@@ -22,6 +22,12 @@ from django.http import JsonResponse
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.http import HttpResponse
+from django.shortcuts import redirect
+from django.urls import reverse
+from django.urls import reverse_lazy
+from django.views.generic.edit import CreateView
+from cars.models import Auto
+
 class AutoFilterAPIView(generics.ListAPIView):
     """
     API для фильтрации автомобилей.
@@ -272,6 +278,7 @@ class AutoListView(ListAPIView):
     serializer_class = AutoSerializer
     pagination_class = CustomPagination
 
+# redis
 def get_cached_autos():
     cache_key = "autos_list"  # уникальный ключ для кеша
     autos = cache.get(cache_key)  # пробуем получить данные из кеша
@@ -285,22 +292,11 @@ def get_cached_autos():
 
     return autos
 
+# представление
 def autos_list_view(request):
-    # уникальный ключ для кеша
-    cache_key = "autos_list"
+    autos = get_cached_autos()  # получаем список автомобилей из кэша или базы
 
-    # попробуем получить данные из кеша
-    autos = cache.get(cache_key)
-
-    if autos is None:
-        # если данных нет в кеше, извлекаем их из базы данных
-        print("Данные извлекаются из базы данных...")
-        autos = list(Auto.objects.select_related('brand', 'body_type', 'engine_type').all())
-        cache.set(cache_key, autos, timeout=60 * 15)  # сохраняем данные в кеш на 15 минут
-    else:
-        print("Данные получены из кеша.")
-
-    # Формируем данные для ответа
+    # формируем данные для ответа
     data = [
         {
             "id": auto.id,
@@ -326,3 +322,24 @@ def send_test_email(request):
         return HttpResponse("Тестовое письмо успешно отправлено!")
     except Exception as e:
         return HttpResponse(f"Ошибка отправки письма: {e}")
+
+
+
+
+
+
+
+
+
+def test_redirect_view(request):
+    # генерация URL для маршрута с именем create_auto
+    url = reverse('create_auto')  
+    print(f"Перенаправляем на: {url}")  # для проверки в логах
+    return redirect(url)  # перенаправление на /create-auto/
+
+class AutoCreateView(CreateView):
+    model = Auto
+    fields = ['brand', 'model', 'year', 'mileage', 'price', 'body_type', 'engine_type', 'color', 'region', 'sell_status']
+    template_name = 'create_auto.html'  # шаблон, который будет использоваться
+    success_url = reverse_lazy('autos-list')  # URL, куда перенаправить после успешного создания
+

@@ -50,7 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'simple_history.middleware.HistoryRequestMiddleware',
+    'simple_history.middleware.HistoryRequestMiddleware', # позволяет сохранять историю изменений моделей
     # Allauth middleware
     'allauth.account.middleware.AccountMiddleware',
 ]
@@ -135,6 +135,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# настройки swagger
 SPECTACULAR_SETTINGS = {
     'TITLE': 'carsales',
     'DESCRIPTION': 'Документация',
@@ -142,7 +143,7 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False, # опционально, отключить автосоздание схемы
 }
 
-# настройки Celery
+# настройки сelery
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']  # формат данных
@@ -160,7 +161,7 @@ LOGGING = {
         'level': 'INFO',
     },
 }
-
+# настройка redis
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -181,33 +182,16 @@ EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',  # Стандартная аутентификация Django
+    'django.contrib.auth.backends.ModelBackend',  # cтандартная аутентификация Django
     'allauth.account.auth_backends.AuthenticationBackend',  # Поддержка allauth
 ]
 
 SITE_ID = 1
 
-ACCOUNT_EMAIL_VERIFICATION = "none"  # Отключаем обязательное подтверждение email
-ACCOUNT_EMAIL_REQUIRED = True        # Email обязателен
+ACCOUNT_EMAIL_VERIFICATION = "none"  # отключаем обязательное подтверждение email
+ACCOUNT_EMAIL_REQUIRED = True        # email обязателен
 
 LOGIN_URL = '/login/'
 LOGOUT_URL = '/logout/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
-
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'APP': {
-            'client_id': '609090162592-nt6766oo8s7d2kpn1jd8arobs34iqqig.apps.googleusercontent.com',
-            'secret': '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',
-            'key': ''
-        },
-        'SCOPE': [
-            'email',
-            'profile',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        }
-    }
-}

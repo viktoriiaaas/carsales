@@ -6,13 +6,13 @@ from cars.views import (
     AutoListView, AutoViewSet,  AutoFilterAPIView, AutoSearchAPIView, BrandViewSet, ProfileViewSet, index, auto_create, auto_delete, auto_detail
 )
 from cars.views import autos_list_view
-
 from news import views as news_views
 from django.urls import path
 from cars.views import send_test_email
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
-
+from cars.views import AutoCreateView
+from cars.views import test_redirect_view
 
 router = DefaultRouter()
 router.register(r'autos', AutoViewSet, basename='autos')
@@ -21,21 +21,21 @@ router.register(r'profiles', ProfileViewSet, basename='profiles')
 
 urlpatterns = [
     path('auth/', include('social_django.urls', namespace='social')),  # Social Auth
-    # Схема API
+    path('create-auto/', AutoCreateView.as_view(), name='create_auto'),
+    # Swagger
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    
-    # Swagger UI
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    
-    # Redoc (альтернативная документация)
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
-    # Главная страница
+    # главная страница
     path('', index, name='index'),
 
-    # Админка
+    # админка
     path('admin/', admin.site.urls),
+
     path('api/autos/', AutoListView.as_view(), name='auto-list'),
+
+    # авторизация с помощью allauth
     path('accounts/', include('allauth.urls')),  # URL-ы для входа/выхода и авторизации
     path('api/autos/filter/', AutoFilterAPIView.as_view(), name='auto-filter'),
 
@@ -54,9 +54,9 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('send-test-email/', send_test_email, name='send_test_email'),  # Новый маршрут
 
-    # Используем класс AutoListView с методом as_view() для списка автомобилей
-    path('api/autos/', AutoListView.as_view(), name='auto-list'),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    path('create-auto/', AutoCreateView.as_view(), name='create_auto'),
+    path('test-redirect/', test_redirect_view, name='test_redirect'),
+    ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -69,10 +69,11 @@ class AutoAdmin(ExportMixin, admin.ModelAdmin):
         }),
     )
     inlines = [AutoPhotoInline]
-
+    raw_id_fields = ['brand', 'profile']
     def display_mileage(self, obj):
         return f"{obj.mileage:,} км"  
     display_mileage.short_description = 'Пробег в километрах' # описание в колонке пробега таблицы 
+
 
 # управление autoPhoto
 class AutoPhotoAdmin(admin.ModelAdmin):
