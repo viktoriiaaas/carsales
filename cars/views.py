@@ -236,7 +236,7 @@ class CustomPagination(PageNumberPagination):
     """
     page_size = 3  # количество объектов на одной странице
     
-    def get_paginated_ushse(self, data):
+    def get_paginated_responce(self, data):
         """
         Формируем кастомный ответ для клиента.
         """

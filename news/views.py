@@ -7,10 +7,8 @@ from .models import New
 from .serializers import NewSerializer
 
 def news_list(request):
-    """Отображение страницы со списком новостей"""
-    news = New.objects.all().order_by('-created_at')  # Сортируем по полю created_at
+    news = New.objects.all()
     return render(request, 'news.html', {'news': news})
-
 
 class FilteredNewsAPIView(APIView):
     """Фильтрация новостей с использованием Q-запросов и APIView."""

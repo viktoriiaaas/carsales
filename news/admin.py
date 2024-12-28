@@ -13,13 +13,13 @@ class NewAdmin(admin.ModelAdmin):
     search_fields = ('title', 'profile__username', 'category__name')
     list_filter = ('category',)
     inlines = [NewPhotoInline]
-
+    filter_horizontal = ('photos',)  # Добавляем горизонтальный фильтр для фотографий
+    date_hierarchy = 'created_at'
     fieldsets = (
         ('Основная информация', {
-            'fields': ('title', 'content', 'profile', 'category')
+            'fields': ('title', 'content', 'profile', 'category', 'photos')
         }),
     )
-
 
 # админка для категории новостей
 class NewCategoryAdmin(admin.ModelAdmin):

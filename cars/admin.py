@@ -49,20 +49,21 @@ class AutoPhotoInline(admin.TabularInline):
 
 # управление photo
 class PhotoAdmin(admin.ModelAdmin):
-    list_display = ['url', 'description']
+    list_display = ['url', 'description']  # Добавляем колонку для длины описания
     search_fields = ['url', 'description']
 
 # управление auto
 class AutoAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = AutoResource
     formats = [XLS]
+    
     list_display = ('id', 'brand', 'model', 'description', 'year', 'price', 'profile', 'sell_status', 'display_mileage')
-    list_display_links = ('brand', 'model')
+    list_display_links = ('model', 'description')
     search_fields = ('brand__name', 'model', 'profile__username', 'sell_status__name')
     list_filter = ('brand', 'year', 'sell_status')
     fieldsets = (
         ('Основная информация', {
-            'fields': ('brand', 'model', 'year', 'price', 'description', 'sell_status')
+            'fields': ('id', 'brand', 'model', 'year', 'price', 'description', 'sell_status')
         }),
         ('Дополнительная информация', {
             'fields': ('mileage', 'body_type', 'engine_type', 'color', 'region', 'profile')
@@ -70,10 +71,11 @@ class AutoAdmin(ExportMixin, admin.ModelAdmin):
     )
     inlines = [AutoPhotoInline]
     raw_id_fields = ['brand', 'profile']
+    readonly_fields = ('id',)
+    # собственный метод
+    @admin.display(description='Пробег в километрах')  # Устанавливаем заголовок для колонки
     def display_mileage(self, obj):
-        return f"{obj.mileage:,} км"  
-    display_mileage.short_description = 'Пробег в километрах' # описание в колонке пробега таблицы 
-
+        return f"{obj.mileage:,} км"  # Форматируем пробег с разделителями
 
 # управление autoPhoto
 class AutoPhotoAdmin(admin.ModelAdmin):

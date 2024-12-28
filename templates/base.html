@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Мой сайт{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        h1, h2 {
+            background-color: #f4f4f4;
+            padding: 15px;
+            text-align: center;
+        }
+        .container {
+            margin: 20px auto;
+            width: 90%;
+            max-width: 1200px;
+        }
+        .navbar {
+            background-color: #007BFF;
+            padding: 10px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+        img {
+            max-width: 100%; /* Изображение не будет превышать ширину контейнера */
+            max-height: 300px; /* Максимальная высота изображения */
+            height: auto; /* Сохраняет пропорции */
+            width: auto; /* Сохраняет пропорции */
+            display: block; /* Убирает лишние отступы */
+            margin: 0 auto; /* Центруем изображение */
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div>avto.ru</div>
+        <div>
+            {% if user.is_authenticated %}
+                Здравствуйте, {{ user.first_name }}!
+                <a href="{% url 'account_logout' %}">(Выйти)</a>
+            {% else %}
+                <a href="{% url 'account_login' %}">Войти</a> | 
+                <a href="{% url 'account_signup' %}">Зарегистрироваться</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% block content %}
+    <!-- Контент каждой страницы -->
+    {% endblock %}
+
+    <footer>
+        <p>&copy; 2024 Мой сайт</p>
+    </footer>
+</body>
+</html>

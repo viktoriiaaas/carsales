@@ -25,6 +25,7 @@ class New(TimeStamped):
     content = models.TextField()
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     category = models.ForeignKey(NewCategory, on_delete=models.PROTECT, null=True)
+    photos = models.ManyToManyField('NewPhoto', blank=True, related_name="news")  # Новое поле
 
     class Meta:
         ordering = ['-created_at']
@@ -32,7 +33,6 @@ class New(TimeStamped):
 
     def __str__(self):
         return self.title
-
 
 class NewPhoto(models.Model):
     new = models.ForeignKey(New, on_delete=models.CASCADE, related_name="new_photos")
