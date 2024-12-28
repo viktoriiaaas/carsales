@@ -1,32 +1,22 @@
 from django.shortcuts import render, get_object_or_404
-from rest_framework.generics import ListAPIView
-from rest_framework.response import Response
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseNotAllowed
-from cars.models import Auto, AutoPhoto
-from django.db.models import Q
-import json
-from cars.models import Auto, Brand, BodyType, EngineType, Color, Region, SellStatus, Profile
-from rest_framework import generics, viewsets, status
-from rest_framework.filters import SearchFilter
-from rest_framework.decorators import action
-from .serializers import AutoSerializer
-from rest_framework import viewsets, status
-from .serializers import AutoSerializer, BrandSerializer, ProfileSerializer
 from django.core.cache import cache
+from django.db.models import Q
+
+import json
+
+from rest_framework import generics, viewsets, status
+from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView
-from cars.models import Auto
-from cars.serializers import AutoSerializer
-from django.http import JsonResponse
+
+from cars.models import Auto, AutoPhoto, Brand, BodyType, EngineType, Color, Region, SellStatus, Profile
+from cars.serializers import AutoSerializer, BrandSerializer, ProfileSerializer
+
 from django.core.cache import cache
-from django.core.mail import send_mail
-from django.http import HttpResponse
-from django.shortcuts import redirect
-from django.urls import reverse
-from django.urls import reverse_lazy
-from django.views.generic.edit import CreateView
-from cars.models import Auto
 
 class AutoFilterAPIView(generics.ListAPIView):
     """
@@ -246,7 +236,7 @@ class CustomPagination(PageNumberPagination):
     """
     page_size = 3  # количество объектов на одной странице
     
-    def get_paginated_response(self, data):
+    def get_paginated_ushse(self, data):
         """
         Формируем кастомный ответ для клиента.
         """
@@ -309,37 +299,4 @@ def autos_list_view(request):
     ]
 
     return JsonResponse(data, safe=False)
-
-# mailhog
-def send_test_email(request):
-    subject = "Тестовое письмо"
-    message = "Это тестовое письмо отправлено через Mailhog."
-    from_email = "test@example.com"
-    recipient_list = ["recipient@example.com"] 
-    
-    try:
-        send_mail(subject, message, from_email, recipient_list)
-        return HttpResponse("Тестовое письмо успешно отправлено!")
-    except Exception as e:
-        return HttpResponse(f"Ошибка отправки письма: {e}")
-
-
-
-
-
-
-
-
-
-def test_redirect_view(request):
-    # генерация URL для маршрута с именем create_auto
-    url = reverse('create_auto')  
-    print(f"Перенаправляем на: {url}")  # для проверки в логах
-    return redirect(url)  # перенаправление на /create-auto/
-
-class AutoCreateView(CreateView):
-    model = Auto
-    fields = ['brand', 'model', 'year', 'mileage', 'price', 'body_type', 'engine_type', 'color', 'region', 'sell_status']
-    template_name = 'create_auto.html'  # шаблон, который будет использоваться
-    success_url = reverse_lazy('autos-list')  # URL, куда перенаправить после успешного создания
 
