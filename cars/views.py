@@ -2,9 +2,8 @@ from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseNotAllowed
 from django.core.cache import cache
 from django.db.models import Q
-
 import json
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from rest_framework import generics, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
@@ -12,11 +11,16 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListAPIView
-
+from django.http import HttpResponse
 from cars.models import Auto, AutoPhoto, Brand, BodyType, EngineType, Color, Region, SellStatus, Profile
 from cars.serializers import AutoSerializer, BrandSerializer, ProfileSerializer
 
 from django.core.cache import cache
+#для форм
+from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect
+from .forms import ContactForm
+
 
 class AutoFilterAPIView(generics.ListAPIView):
     """
@@ -50,22 +54,48 @@ class AutoFilterAPIView(generics.ListAPIView):
 
 def index(request):
 
-    autos = Auto.objects.all()[:10]
+    if request.method == 'POST':
+        form = ContactForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('index')
+    else:
+        form = ContactForm()
+
+    autos = Auto.objects.all()  # получаем все автомобили
+    paginator = Paginator(autos, 3)  # пагинация: 3 автомобиля на одной странице
+
+    page = request.GET.get('page')  # получаем текущую страницу из запроса
+    try:
+        autos_page = paginator.page(page)  # получаем автомобили для текущей страницы
+    except PageNotAnInteger:
+        autos_page = paginator.page(1)  # если страница не является числом, показываем первую страницу
+    except EmptyPage:
+        autos_page = paginator.page(paginator.num_pages)  # если страница пустая, показываем последнюю страницу
+
+    # формируем список автомобилей с фотографиями
     autos_with_photos = [
         {"auto": auto, "photos": AutoPhoto.objects.filter(auto=auto)}
-        for auto in autos
+        for auto in autos_page
     ]
-    return render(request, 'index.html', {'autos_with_photos': autos_with_photos})
 
+    return render(request, 'index.html', {
+        'autos_with_photos': autos_with_photos,
+        'autos_page': autos_page,
+        'autos': autos, 
+    })
 
 def auto_detail(request, pk):
-    if request.method == "GET":
-        auto = get_object_or_404(Auto, pk=pk)
-        serializer = AutoSerializer(auto)
-        return JsonResponse(serializer.data, safe=False)
-    else:
-        return HttpResponseNotAllowed(['GET'])
-
+    print(f"Запрос от пользователя: {request.user}")
+    auto = get_object_or_404(Auto, pk=pk)
+    return JsonResponse({
+        "id": auto.id,
+        "brand": auto.brand.name,
+        "model": auto.model,
+        "year": auto.year,
+        "price": float(auto.price),
+        "description": auto.description,
+    })
 
 def auto_create(request):
     if request.method == "POST":
@@ -124,16 +154,21 @@ class AutoViewSet(viewsets.ModelViewSet):
     @action(methods=['GET'], detail=False, url_path='recommended-autos')
     def recommended_autos(self, request):
         """
-        Рекомендованные автомобили:
-        - Марки BMW или Mercedes
-        - Цена менее 5,000,000
-        - Год выпуска начиная с 2015
+        Рекомендованные автомобили с возможностью ограничения количества.
         """
         recommended_cars = Auto.objects.filter(
-            (Q(brand__name__icontains="BMW") | Q(brand__name__icontains="Mercedes-Benz")) &  # или
-            ~Q(price__gte=5000000) &  # не
-            Q(year__gte=2015)  # и
+            (Q(brand__name__icontains="BMW") | Q(brand__name__icontains="Mercedes-Benz")) &
+            ~Q(price__gte=5000000) &
+            Q(year__gte=2015)
         )
+        limit = request.GET.get('limit')
+        if limit:
+            try:
+                limit = int(limit)
+                recommended_cars = recommended_cars[:limit]
+            except ValueError:
+                pass
+
         if not recommended_cars.exists():
             return Response({"message": "No recommended cars found"}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(recommended_cars, many=True)
@@ -162,22 +197,22 @@ class AutoViewSet(viewsets.ModelViewSet):
         """
         Метод для создания нового автомобиля через POST-запрос.
         """
-        # Получение данных из тела запроса
+        # получение данных из тела запроса
         data = request.data
 
         try:
-            # Проверка пользователя
+            # проверка пользователя
             user = request.user
             if not user.is_authenticated:
                 return Response({"error": "Вы должны быть авторизованы, чтобы создать автомобиль"}, status=status.HTTP_401_UNAUTHORIZED)
 
-            # Проверка связанного профиля
+            # проверка связанного профиля
             try:
                 profile = Profile.objects.get(id=user.id)
             except Profile.DoesNotExist:
                 return Response({"error": "У текущего пользователя нет связанного профиля"}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Получение связанных моделей
+            # получение связанных моделей
             brand = Brand.objects.get(id=data.get("brand_id"))
             body_type = BodyType.objects.get(id=data.get("body_type_id"))
             engine_type = EngineType.objects.get(id=data.get("engine_type_id"))
@@ -185,7 +220,7 @@ class AutoViewSet(viewsets.ModelViewSet):
             region = Region.objects.get(id=data.get("region_id"))
             sell_status = SellStatus.objects.get(id=data.get("sell_status_id"))
 
-            # Создание автомобиля
+            # создание автомобиля
             auto = Auto.objects.create(
                 brand=brand,
                 model=data.get("model"),
@@ -227,6 +262,54 @@ class AutoSearchAPIView(ListAPIView):
     serializer_class = AutoSerializer
     filter_backends = [SearchFilter]
     search_fields = ['brand__name', 'model', 'description']
+
+from django.http import JsonResponse
+from django.db.models import F, Q
+from cars.models import Auto
+
+def manage_autos(request):
+    """
+    Универсальная функция для работы с автомобилями:
+    - Получение значений (values, values_list)
+    - Подсчёт записей (count, exists)
+    - Обновление (update)
+    - Удаление (delete)
+    """
+    action = request.GET.get('action')
+
+    if action == 'values':
+        # получение списка автомобилей в виде словарей
+        autos = Auto.objects.values('id', 'model', 'price', 'year')
+        return JsonResponse(list(autos), safe=False)
+
+    elif action == 'values_list':
+        # получение списка автомобилей в виде кортежей
+        autos = Auto.objects.values_list('id', 'model', 'price', 'year')
+        return JsonResponse(list(autos), safe=False)
+
+    elif action == 'count':
+        # подсчёт всех автомобилей
+        total_count = Auto.objects.count()
+        return JsonResponse({'total_count': total_count})
+
+    elif action == 'exists':
+        # проверка наличия автомобилей с ценой выше 10 млн
+        expensive_exists = Auto.objects.filter(price__gt=10000000).exists()
+        return JsonResponse({'expensive_exists': expensive_exists})
+
+    elif action == 'update':
+        # увеличение цены всех автомобилей на 10%
+        updated_count = Auto.objects.update(price=F('price') * 1.1)
+        return JsonResponse({'updated_count': updated_count})
+
+    elif action == 'delete':
+        # удаление автомобилей, выпущенных до 2000 года
+        deleted_count, _ = Auto.objects.filter(year__lt=2000).delete()
+        return JsonResponse({'deleted_count': deleted_count})
+
+    else:
+        # если параметр action не передан или неверный
+        return JsonResponse({'error': 'Invalid or missing action parameter'}, status=400)
 
 
 # пагинация
@@ -270,17 +353,7 @@ class AutoListView(ListAPIView):
 
 # redis
 def get_cached_autos():
-    cache_key = "autos_list"  # уникальный ключ для кеша
-    autos = cache.get(cache_key)  # пробуем получить данные из кеша
-
-    if autos is None:  # если данных нет в кеше
-        print("Данные извлекаются из базы данных...")
-        autos = list(Auto.objects.select_related('brand', 'body_type', 'engine_type').all())
-        cache.set(cache_key, autos, timeout=60 * 15)  # сохраняем данные в кеш на 15 минут
-    else:
-        print("Данные получены из кеша.")
-
-    return autos
+    return list(Auto.objects.select_related('brand').all())
 
 # представление
 def autos_list_view(request):
@@ -300,3 +373,22 @@ def autos_list_view(request):
 
     return JsonResponse(data, safe=False)
 
+def contact_view(request):
+    if request.method == 'POST':
+        form = ContactForm(request.POST, request.FILES)
+        print("POST данные:", request.POST)  
+        print("FILES данные:", request.FILES)  
+        if form.is_valid():
+            print("Данные формы валидны.")  
+            form.save()
+            return redirect('index')
+        else:
+            print("Ошибки формы:", form.errors)  
+    else:
+        form = ContactForm()
+    
+    return render(request, 'index.html', {'form': form})
+
+def test_view(request):
+    autos = Auto.objects.all()
+    return render(request, 'test_template.html', {'autos_with_photos': autos})

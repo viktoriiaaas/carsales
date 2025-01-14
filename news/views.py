@@ -5,6 +5,8 @@ from rest_framework import status
 from django.db.models import Q
 from .models import New
 from .serializers import NewSerializer
+from django.db.models import Count
+from .models import NewCategory
 
 def news_list(request):
     news = New.objects.all()
@@ -14,10 +16,10 @@ class FilteredNewsAPIView(APIView):
     """Фильтрация новостей с использованием Q-запросов и APIView."""
 
     def get(self, request):
-        category = request.GET.get('category')  # Фильтр по категории
-        title_keyword = request.GET.get('title_keyword')  # Фильтр по ключевым словам в заголовке
-        content_keyword = request.GET.get('content_keyword')  # Фильтр по ключевым словам в контенте
-        exclude_user = request.GET.get('exclude_user')  # Исключить новости, созданные определенным пользователем
+        category = request.GET.get('category')  # фильтр по категории
+        title_keyword = request.GET.get('title_keyword')  # фильтр по ключевым словам в заголовке
+        content_keyword = request.GET.get('content_keyword')  # фильтр по ключевым словам в контенте
+        exclude_user = request.GET.get('exclude_user')  # исключить новости, созданные определенным пользователем
 
         # Создаем фильтры
         filters = Q()
@@ -30,11 +32,18 @@ class FilteredNewsAPIView(APIView):
         if exclude_user:
             filters &= ~Q(profile__username=exclude_user)  # NOT условие для исключения пользователя
 
-        # Фильтруем новости
+        # фильтруем новости
         news_items = New.objects.filter(filters)
         if not news_items.exists():
             return Response({"error": "No news match the given filters"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Сериализуем и возвращаем данные
+        # сериализуем и возвращаем данные
         serializer = NewSerializer(news_items, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+def category_summary(request):
+    """
+    Представление для отображения количества новостей в каждой категории.
+    """
+    categories = NewCategory.objects.annotate(news_count=Count('newcategoryassignment'))
+    return render(request, 'news/category_summary.html', {'categories': categories})

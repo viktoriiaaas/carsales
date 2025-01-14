@@ -10,22 +10,33 @@ from news import views as news_views
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
-
+from cars.views import manage_autos
+from cars.views import contact_view
+from news.views import category_summary
+from cars.views import test_view
 router = DefaultRouter()
 router.register(r'autos', AutoViewSet, basename='autos')
 router.register(r'brands', BrandViewSet, basename='brands')
 router.register(r'profiles', ProfileViewSet, basename='profiles')
+from cars.views import index
+from cars.views import auto_detail
 
 urlpatterns = [
+    path('', index, name='index'),
+    # path('', contact_view, name='contact'),
+    path('test-template/', test_view, name='test_template'),
     path('auth/', include('social_django.urls', namespace='social')),  # Social Auth
     # Swagger
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
-    # главная страница
-    path('', index, name='index'),
+    path('api/autos/<int:pk>/', auto_detail, name='auto-detail'),
 
+    path('', contact_view, name='index'),  # путь для contact_view
+    path('test/', test_view, name='test_view'),
+
+    path('api/autos/manage/', manage_autos, name='manage_autos'),
     # админка
     path('admin/', admin.site.urls),
 
@@ -37,7 +48,7 @@ urlpatterns = [
 
     path('api/autos/search/', AutoSearchAPIView.as_view(), name='auto-search'),
 
-    path('api/autos/<int:pk>/', auto_detail, name='auto-detail'),
+
     path('api/autos/create/', auto_create, name='auto-create'),
     path('api/autos/<int:pk>/delete/', auto_delete, name='auto-delete'),
     
@@ -46,10 +57,12 @@ urlpatterns = [
     # Маршруты для приложения news
     path('news/', news_views.news_list, name='news_list'),
     path('api/autos/search/', AutoSearchAPIView.as_view(), name='auto-search'),
-
     path('api/', include(router.urls)),
+    path('news/category-summary/', category_summary, name='category_summary'),
     ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -19,8 +19,6 @@ def mark_autos_as_sold():
     """
     try:
         sold_status = SellStatus.objects.get(name="Успейте купить")
-
-        # Обновляем статус всех автомобилей с ценой ниже 100,000
         autos_updated = Auto.objects.filter(price__lt=100000).update(sell_status=sold_status)
 
         print(f"{autos_updated} автомобилей переведены в статус 'Успейте купить'")

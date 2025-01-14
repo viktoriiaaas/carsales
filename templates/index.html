@@ -1,27 +1,63 @@
 {% extends 'base.html' %}
+{% load custom_tags %}
 
 {% block title %}Главная страница{% endblock %}
 
 {% block content %}
-<h1>Автомобили</h1>
+<h1>ПОДОБРАТЬ АВТОМОБИЛЬ</h1>
 
 <div class="link">
     <a href="{% url 'news_list' %}">Перейти к свежим новостям...</a>
 </div>
 
 <div class="container">
-    <h2>Подобрали специально для вас:</h2>
+
+    <!-- шаблонные теги-->
+    <p>Всего автомобилей: {% count_total_autos %}</p>
+    <p>Автомобилей на странице: {% count_filtered_autos autos_page %}</p>
+    <h2>НОВЫЕ АВТО 🔥</h2>
+<div class="recent-autos-list">
+    {% get_recent_autos as recent_autos %}
+    {% for auto in recent_autos %}
+    <div class="recent-auto-item">
+        <img src="{{ auto.auto_photos.first.photo.url }}" alt="Фото {{ auto.brand.name }}" class="recent-auto-image">
+        <h4>{{ auto.brand.name }} {{ auto.model }}</h4>
+        <p>Год выпуска: {{ auto.year }}</p>
+        <p>Цена: {{ auto.price|floatformat:0 }} ₽</p>
+    </div>
+    {% empty %}
+    <p>Нет недавно добавленных автомобилей.</p>
+    {% endfor %}
+</div>
+
+<h2>Подобрали специально для вас:</h2>
     <div class="autos-list">
         {% for auto_data in autos_with_photos %}
         <div class="auto-item">
             <h3>{{ auto_data.auto.brand.name }} {{ auto_data.auto.model }}</h3>
             <p>Год выпуска: {{ auto_data.auto.year }}</p>
             <p>Цена: {{ auto_data.auto.price|floatformat:0 }} ₽</p>
+            
             {% for photo in auto_data.photos %}
                 <img src="{{ photo.photo.url }}" alt="Фото {{ auto_data.auto.brand.name }}">
             {% endfor %}
         </div>
         {% endfor %}
     </div>
+</div>
+
+<!-- Ссылки для перехода между страницами -->
+<div class="pagination">
+    {% if autos_page.has_previous %}
+        <a href="?page=1">Первая</a>
+        <a href="?page={{ autos_page.previous_page_number }}">Предыдущая</a>
+    {% endif %}
+
+    <span>Страница {{ autos_page.number }} из {{ autos_page.paginator.num_pages }}</span>
+
+    {% if autos_page.has_next %}
+        <a href="?page={{ autos_page.next_page_number }}">Следующая</a>
+        <a href="?page={{ autos_page.paginator.num_pages }}">Последняя</a>
+    {% endif %}
 </div>
 {% endblock %}

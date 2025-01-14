@@ -4,7 +4,7 @@ from import_export.admin import ExportMixin
 from import_export.formats.base_formats import XLS
 from django.utils.timezone import now
 from .models import Auto, AutoPhoto, Profile, Brand, BodyType, EngineType, Color, SellStatus, Region, Photo
-
+from .models import ContactMessage
 
 # для экспорта данных из Auto с использованием django-import-export
 class AutoResource(resources.ModelResource):
@@ -73,15 +73,25 @@ class AutoAdmin(ExportMixin, admin.ModelAdmin):
     raw_id_fields = ['brand', 'profile']
     readonly_fields = ('id',)
     # собственный метод
-    @admin.display(description='Пробег в километрах')  # Устанавливаем заголовок для колонки
+    @admin.display(description='Пробег в километрах')  # устанавливаем заголовок для колонки
     def display_mileage(self, obj):
-        return f"{obj.mileage:,} км"  # Форматируем пробег с разделителями
+        return f"{obj.mileage:,} км"  # форматируем пробег с разделителями
 
 # управление autoPhoto
 class AutoPhotoAdmin(admin.ModelAdmin):
     list_display = ['auto', 'photo']
     search_fields = ['auto__brand__name', 'auto__model']
 
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    """
+    Настройки отображения модели ContactMessage в админке.
+    """
+    list_display = ('id', 'name', 'email', 'created_at')  # поля, которые будут отображаться в списке сообщений
+    list_display_links = ('name', 'email')  # поля, по которым можно кликнуть для перехода в редактирование
+    search_fields = ('name', 'email', 'message')  # поля, по которым можно выполнять поиск
+    list_filter = ('created_at',)  # фильтр по дате создания
+    readonly_fields = ('created_at',)  # поля, которые нельзя редактировать
 
 admin.site.register(Profile)
 admin.site.register(Brand)

@@ -40,11 +40,13 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -56,11 +58,12 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'carsales.urls'
-
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # для разработки
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -68,11 +71,12 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'cars.context_processor.contact_form_processor',
             ],
         },
     },
 ]
-
+STATIC_URL = '/static/'
 WSGI_APPLICATION = 'carsales.wsgi.application'
 
 # Database
@@ -196,3 +200,31 @@ LOGOUT_URL = '/logout/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': '609090162592-nt6766oo8s7d2kpn1jd8arobs34iqqig.apps.googleusercontent.com',
+            'secret': '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',
+            'key': ''
+        },
+        'SCOPE': [
+            'email',
+            'profile',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  
+SESSION_COOKIE_AGE = 900 
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True 
+
+INTERNAL_IPS = [
+    '127.0.0.1',  
+]
+
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG, # показывать панель только если DEBUG=True
+}
