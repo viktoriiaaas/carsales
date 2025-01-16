@@ -5,6 +5,10 @@
 
 {% block content %}
 <h1>ПОДОБРАТЬ АВТОМОБИЛЬ</h1>
+<form method="get" action="{% url 'search_autos' %}" class="search-form">
+    <input type="text" name="q" placeholder="Поиск автомобилей...">
+    <button type="submit">Найти</button>
+</form>
 
 <div class="link">
     <a href="{% url 'news_list' %}">Перейти к свежим новостям...</a>

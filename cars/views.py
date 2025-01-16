@@ -111,6 +111,19 @@ def auto_create(request):
     else:
         return HttpResponseNotAllowed(['POST'])
 
+def search_autos(request):
+    query = request.GET.get('q')  # Получаем поисковый запрос из URL
+    results = []
+
+    if query:
+        # Выполняем поиск по модели, бренду и описанию автомобиля
+        results = Auto.objects.filter(
+            Q(brand__name__icontains=query) |
+            Q(model__icontains=query) |
+            Q(description__icontains=query)
+        )
+
+    return render(request, 'search_results.html', {'results': results, 'query': query})
 
 def auto_delete(request, pk):
     if request.method == "DELETE":

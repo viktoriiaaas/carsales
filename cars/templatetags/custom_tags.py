@@ -2,6 +2,7 @@ from django import template
 from cars.models import Auto
 
 register = template.Library()
+
 # 1 простая функция для подсчета общего количества автомобилей
 @register.simple_tag
 def count_total_autos():

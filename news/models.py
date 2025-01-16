@@ -87,3 +87,5 @@ class NewPhoto(models.Model):
         if img.height > 300 or img.width > 300:
             img.thumbnail(max_size)  # изменяем размер изображения
             img.save(img_path)  # сохраняем измененное изображение
+        
+        # thumbnail изменяет размер изображения, сохраняя его пропорции

@@ -6,6 +6,7 @@ from cars.views import (
     AutoListView, AutoViewSet,  AutoFilterAPIView, AutoSearchAPIView, BrandViewSet, ProfileViewSet, index, auto_create, auto_delete, auto_detail
 )
 from cars.views import autos_list_view
+from cars.views import search_autos
 from news import views as news_views
 from django.urls import path
 from rest_framework.routers import DefaultRouter
@@ -30,7 +31,7 @@ urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-
+    path('search/', search_autos, name='search_autos'),
     path('auto/<int:pk>/', auto_detail, name='auto_detail'),
 
     path('', contact_view, name='index'),  # путь для contact_view
