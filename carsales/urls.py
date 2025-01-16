@@ -31,7 +31,7 @@ urlpatterns = [
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
-    path('api/autos/<int:pk>/', auto_detail, name='auto-detail'),
+    path('auto/<int:pk>/', auto_detail, name='auto_detail'),
 
     path('', contact_view, name='index'),  # путь для contact_view
     path('test/', test_view, name='test_view'),

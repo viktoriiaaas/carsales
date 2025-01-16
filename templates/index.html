@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load custom_tags %}
+{% load custom_tags static%}
 
 {% block title %}Главная страница{% endblock %}
 
@@ -16,36 +16,45 @@
     <p>Всего автомобилей: {% count_total_autos %}</p>
     <p>Автомобилей на странице: {% count_filtered_autos autos_page %}</p>
     <h2>НОВЫЕ АВТО 🔥</h2>
-<div class="recent-autos-list">
-    {% get_recent_autos as recent_autos %}
-    {% for auto in recent_autos %}
-    <div class="recent-auto-item">
-        <img src="{{ auto.auto_photos.first.photo.url }}" alt="Фото {{ auto.brand.name }}" class="recent-auto-image">
-        <h4>{{ auto.brand.name }} {{ auto.model }}</h4>
-        <p>Год выпуска: {{ auto.year }}</p>
-        <p>Цена: {{ auto.price|floatformat:0 }} ₽</p>
+    <div class="recent-autos-list">
+        {% get_recent_autos as recent_autos %}
+        {% for auto in recent_autos %}
+        <div class="recent-auto-item">
+            <a href="{{ auto.get_absolute_url }}">
+                {% if auto.auto_photos.first %}
+                    <!-- Отображаем фото, если оно есть -->
+                    <img src="{{ auto.auto_photos.first.photo.url }}" alt="Фото {{ auto.brand.name }}" class="recent-auto-image">
+                {% else %}
+                    <!-- Отображаем заглушку, если фото нет -->
+                    <img src="{% static 'images/no_image_available.png' %}" alt="Нет изображения" class="recent-auto-image">
+                {% endif %}
+            </a>
+            <h4>{{ auto.brand.name }} {{ auto.model }}</h4>
+            <p>Год выпуска: {{ auto.year }}</p>
+            <p>Цена: {{ auto.price|floatformat:0 }} ₽</p>
+        </div>
+        {% empty %}
+        <p>Нет недавно добавленных автомобилей.</p>
+        {% endfor %}
     </div>
-    {% empty %}
-    <p>Нет недавно добавленных автомобилей.</p>
-    {% endfor %}
-</div>
-
-<h2>Подобрали специально для вас:</h2>
+    <h2>Подобрали специально для вас:</h2>
     <div class="autos-list">
         {% for auto_data in autos_with_photos %}
         <div class="auto-item">
-            <h3>{{ auto_data.auto.brand.name }} {{ auto_data.auto.model }}</h3>
-            <p>Год выпуска: {{ auto_data.auto.year }}</p>
-            <p>Цена: {{ auto_data.auto.price|floatformat:0 }} ₽</p>
-            
-            {% for photo in auto_data.photos %}
-                <img src="{{ photo.photo.url }}" alt="Фото {{ auto_data.auto.brand.name }}">
-            {% endfor %}
+            <!-- Ссылка на детальную страницу автомобиля -->
+            <a href="{{ auto_data.auto.get_absolute_url }}">
+                <h3>{{ auto_data.auto.brand.name }} {{ auto_data.auto.model }}</h3>
+                <p>Год выпуска: {{ auto_data.auto.year }}</p>
+                <p>Цена: {{ auto_data.auto.price|floatformat:0 }} ₽</p>
+    
+                {% for photo in auto_data.photos %}
+                    <img src="{{ photo.photo.url }}" alt="Фото {{ auto_data.auto.brand.name }}">
+                {% endfor %}
+            </a>
         </div>
         {% endfor %}
     </div>
 </div>
-
 <!-- Ссылки для перехода между страницами -->
 <div class="pagination">
     {% if autos_page.has_previous %}
@@ -60,4 +69,12 @@
         <a href="?page={{ autos_page.paginator.num_pages }}">Последняя</a>
     {% endif %}
 </div>
+<h2>Купили только что 🔥</h2>
+<ul>
+    {% not_available_autos as autos %}
+    {% for auto in autos %}
+        <li>{{ auto.brand.name }} {{ auto.model }} ({{ auto.year }})</li>
+    {% endfor %}
+</ul>
+
 {% endblock %}

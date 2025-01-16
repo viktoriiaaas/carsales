@@ -3,7 +3,7 @@ from simple_history.models import HistoricalRecords
 from django.contrib.auth.models import AbstractUser
 from django.utils.timezone import now 
 from datetime import timedelta 
-
+from django.urls import reverse
 
 class Profile(AbstractUser):
 
@@ -126,6 +126,12 @@ class TimeStamped(models.Model):
     class Meta:
         abstract = True 
 
+class AutoManager(models.Manager):
+    def available(self):
+        """
+        Возвращает автомобили, доступные для продажи (не проданы).
+        """
+        return self.filter(sell_status__name__iexact="В продаже")
 
 class Auto(TimeStamped):
     brand = models.ForeignKey(Brand, on_delete=models.PROTECT) 
@@ -142,7 +148,7 @@ class Auto(TimeStamped):
     sell_status = models.ForeignKey(SellStatus, on_delete=models.PROTECT, null=True, blank=True)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     # on_delete=models.CASCADE удаляет автомобиль, если связанный пользователь удалён
-
+    objects = AutoManager()
     history = HistoricalRecords()
 
     class Meta:
@@ -150,6 +156,12 @@ class Auto(TimeStamped):
 
     def __str__(self):
         return f"{self.brand.name} {self.model} ({self.year})"
+    
+    def get_absolute_url(self):
+        """
+        Возвращает URL для просмотра деталей автомобиля.
+        """
+        return reverse('auto_detail', kwargs={'pk': self.pk})
 
 
 class Photo(models.Model):
@@ -188,3 +200,4 @@ class AutoPhoto(models.Model):
 
     def __str__(self):
         return f"{self.auto.brand.name} {self.auto.model} ({self.auto.year})"
+    

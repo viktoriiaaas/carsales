@@ -62,7 +62,7 @@ def index(request):
     else:
         form = ContactForm()
 
-    autos = Auto.objects.all()  # получаем все автомобили
+    autos = Auto.objects.available()  # получаем все автомобили в продаже
     paginator = Paginator(autos, 3)  # пагинация: 3 автомобиля на одной странице
 
     page = request.GET.get('page')  # получаем текущую страницу из запроса

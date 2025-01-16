@@ -7,6 +7,8 @@ from .models import New
 from .serializers import NewSerializer
 from django.db.models import Count
 from .models import NewCategory
+from django.shortcuts import redirect
+from django.urls import reverse
 
 def news_list(request):
     news = New.objects.all()
@@ -47,3 +49,10 @@ def category_summary(request):
     """
     categories = NewCategory.objects.annotate(news_count=Count('newcategoryassignment'))
     return render(request, 'news/category_summary.html', {'categories': categories})
+
+def redirect_to_auto(request, pk):
+    """
+    Пример перенаправления на страницу автомобиля.
+    """
+    url = reverse('auto_detail', kwargs={'pk': pk})
+    return redirect(url)

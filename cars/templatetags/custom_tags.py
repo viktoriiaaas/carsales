@@ -21,8 +21,15 @@ def count_filtered_autos(page_obj):
 
 # 3 получение последних автомобилей
 @register.simple_tag
-def get_recent_autos(limit=2):
+def get_recent_autos(limit=3):
     """
-    Возвращает последние автомобили, ограниченные указанным числом 2
+    Возвращает последние автомобили, ограниченные указанным числом 3
     """
     return Auto.objects.order_by('-created_at')[:limit]
+
+@register.simple_tag
+def not_available_autos():
+    """
+    Возвращает автомобили, которые проданы
+    """
+    return Auto.objects.exclude(sell_status__name__iexact="В продаже")
