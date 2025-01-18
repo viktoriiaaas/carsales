@@ -4,35 +4,31 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.timezone import now 
 from datetime import timedelta 
 from django.urls import reverse
+from django.contrib.auth.models import User
 
-class Profile(AbstractUser):
+class Profile(models.Model):
+    # Связь с моделью User
+    user = models.OneToOneField(User, on_delete=models.CASCADE, default=1)
 
-# уже есть основные поля для пользователя:
-# username (логин),
-# password (пароль),
-# email,
-# first_name и last_name (имя и фамилия),
-# is_staff, is_superuser
-
+    # Дополнительные поля профиля
     phone_num = models.CharField(max_length=20, blank=True, null=True)
-
     groups = models.ManyToManyField(
         'auth.Group',
         related_name='profile_groups',
-        blank=True, # пользователь может быть без групп (группы необязательны)
+        blank=True,
     )
-    user_permissions = models.ManyToManyField( 
-        'auth.Permission', # user_permissions связывает пользователя с правами доступа 'auth.Permission'
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
         related_name='profile_permissions',
-        blank=True, # пользователь может быть без специальных прав (по умолчанию)
+        blank=True,
     )
+
+    def __str__(self):
+        return f"{self.user.username} - {self.user.first_name} {self.user.last_name}"
 
     class Meta:
         verbose_name_plural = "Пользователи"
-    
-    def __str__(self):
-        return f"{self.username} ({self.first_name} {self.last_name})" #user (alexander alexander)
-
+        
 def default_token_expiry():
     """Функция для вычисления срока действия токена."""
     return now() + timedelta(hours=1)

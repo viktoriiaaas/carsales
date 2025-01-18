@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ auto.brand.name }} {{ auto.model }}{% endblock %}
+
+{% block content %}
+    <h1>{{ auto.brand.name }} {{ auto.model }} ({{ auto.year }})</h1>
+
+    <div class="auto-details">
+        <div class="auto-image">
+            {% if photos %}
+                <img src="{{ photos.first.photo.url }}" alt="{{ auto.brand.name }} {{ auto.model }}">
+            {% else %}
+                <img src="{% static 'images/no_image_available.png' %}" alt="Нет изображения">
+            {% endif %}
+        </div>
+        
+        <div class="auto-info">
+            <p><strong>Год выпуска:</strong> {{ auto.year }}</p>
+            <p><strong>Пробег:</strong> {{ auto.mileage }} км</p>
+            <p><strong>Цена:</strong> {{ auto.price|floatformat:0 }} ₽</p>
+            <p><strong>Тип кузова:</strong> {{ auto.body_type.name }}</p>
+            <p><strong>Тип двигателя:</strong> {{ auto.engine_type.name }}</p>
+            <p><strong>Цвет:</strong> {{ auto.color.name }}</p>
+            <p><strong>Регион:</strong> {{ auto.region.name }}</p>
+            <p><strong>Статус продажи:</strong> {{ auto.sell_status.name }}</p>
+            <p><strong>Описание:</strong> {{ auto.description }}</p>
+        </div>
+    </div>
+
+    <div class="auto-photos">
+        <h3>Фотографии:</h3>
+        <div class="photos-list">
+            {% for photo in photos %}
+                <div class="photo-item">
+                    <img src="{{ photo.photo.url }}" alt="Фото автомобиля">
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="back-link">
+        <a href="{% url 'index' %}">Назад к списку автомобилей</a>
+    </div>
+{% endblock %}

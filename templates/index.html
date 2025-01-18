@@ -9,9 +9,21 @@
     <input type="text" name="q" placeholder="Поиск автомобилей...">
     <button type="submit">Найти</button>
 </form>
-
+<div class="container">
+    <h2>Последние новости:</h2>
+    <ul>
+        {% for news in latest_news %}
+            <li>
+                {{ news.title }}</a>
+                <p>{{ news.content|truncatewords:20 }}</p> <!-- Обрезаем текст новости до 20 слов -->
+            </li>
+        {% empty %}
+            <p>Нет новостей для отображения.</p>
+        {% endfor %}
+    </ul>
+</div>
 <div class="link">
-    <a href="{% url 'news_list' %}">Перейти к свежим новостям...</a>
+    <a href="{% url 'news_list' %}">Перейти ко всем новостям...</a>
 </div>
 
 <div class="container">

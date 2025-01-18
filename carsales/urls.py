@@ -21,9 +21,14 @@ router.register(r'brands', BrandViewSet, basename='brands')
 router.register(r'profiles', ProfileViewSet, basename='profiles')
 from cars.views import index
 from cars.views import auto_detail
-
+from cars.views import add_auto, edit_auto, delete_auto, auto_list
 urlpatterns = [
     path('', index, name='index'),
+    path('autos/', auto_list, name='auto_list'),
+    path('autos/add/', add_auto, name='add_auto'),
+    path('autos/<int:pk>/edit/', edit_auto, name='edit_auto'),
+    path('autos/<int:pk>/delete/', delete_auto, name='delete_auto'),
+
     # path('', contact_view, name='contact'),
     path('test-template/', test_view, name='test_template'),
     path('auth/', include('social_django.urls', namespace='social')),  # Social Auth

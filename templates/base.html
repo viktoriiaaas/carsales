@@ -8,8 +8,45 @@
     <title>{% block title %}Мой сайт{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/contact_form.css' %}">
     <style>
-        /* Общий стиль для формы поиска */
-        /* Основной контейнер для результатов */
+        .auto-detail {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .auto-detail h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        .auto-images {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .auto-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .auto-info {
+            font-size: 1.2em;
+        }
+        .auto-info p {
+            margin-bottom: 10px;
+        }
+        .auto-info strong {
+            font-weight: bold;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #01787c;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .back-link:hover {
+            background-color: #01787c;
+        }
         .search-results-container {
             max-width: 800px;
             margin: 0 auto;
@@ -19,21 +56,16 @@
             border: 1px solid #ddd;
             border-radius: 8px;
         }
-
-        /* Заголовок страницы */
         .search-results-container h1 {
             text-align: center;
             color: #333;
             margin-bottom: 20px;
         }
-
-        /* Форма поиска */
         .search-form {
             display: flex;
             justify-content: center;
             margin-bottom: 20px;
         }
-
         .search-form input[type="text"] {
             width: 70%;
             padding: 8px;
@@ -41,29 +73,24 @@
             border: 1px solid #ddd;
             border-radius: 4px;
         }
-
         .search-form button {
             padding: 8px 16px;
             font-size: 14px;
-            background-color: #007bff;
+            background-color: #01787c;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             margin-left: 10px;
         }
-
         .search-form button:hover {
-            background-color: #0056b3;
+            background-color: #01787c;
         }
-
-        /* Список результатов */
         .search-results-list {
             list-style: none;
             padding: 0;
             margin: 0;
         }
-
         .search-results-list li {
             margin-bottom: 20px;
             padding: 15px;
@@ -73,38 +100,31 @@
             display: flex;
             flex-direction: column;
         }
-
         .search-results-list li a {
-            color: #007bff;
+            color: #01787c;
             font-weight: bold;
             font-size: 16px;
             text-decoration: none;
             margin-bottom: 10px;
         }
-
         .search-results-list li a:hover {
             text-decoration: underline;
         }
-
         .search-results-list li p {
             margin: 0;
             color: #555;
         }
-
-        /* Пустой результат */
         .no-results-message {
             text-align: center;
             color: #888;
             font-size: 14px;
         }
-
         .search-form {
             display: flex;
             justify-content: center; /* Центрирование формы */
             align-items: center;
             margin: 20px 0;
         }
-
         .search-form input[type="text"] {
             width: 300px; /* Ширина поля поиска */
             padding: 10px;
@@ -113,17 +133,14 @@
             border-radius: 5px;
             transition: all 0.3s ease;
         }
-
         .search-form input[type="text"]:focus {
-            border-color: #007BFF; /* Цвет границы при фокусе */
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            border-color: #01787c; /* Цвет границы при фокусе */
             outline: none;
         }
-
         .search-form button {
             margin-left: 10px;
             padding: 10px 20px;
-            background-color: #007BFF;
+            background-color: #01787c;
             color: #fff;
             border: none;
             border-radius: 5px;
@@ -131,23 +148,19 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-
         .search-form button:hover {
-            background-color: #0056b3; /* Цвет кнопки при наведении */
+            background-color: #01787c; 
         }
-
         .search-form button:active {
-            background-color: #003f7f; /* Цвет кнопки при нажатии */
+            background-color: #01787c; 
         }
-
         .recent-autos-list {
             display: flex;
             gap: 20px;
-            overflow-x: auto; /* Добавляем горизонтальную прокрутку */
+            overflow-x: auto;
             padding: 10px 0;
-            white-space: nowrap; /* Запрещаем перенос элементов на новую строку */
+            white-space: nowrap; 
         }
-
         .recent-auto-item {
             border: 1px solid #ddd;
             border-radius: 5px;
@@ -156,19 +169,16 @@
             text-align: center;
             background-color: #f9f9f9;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            flex: 0 0 auto; /* Фиксируем ширину карточек, чтобы они не сжимались */
+            flex: 0 0 auto; 
         }
-
         .recent-auto-item h4 {
             margin: 10px 0;
             font-size: 16px;
         }
-
         .recent-auto-item p {
             margin: 5px 0;
             font-size: 14px;
         }
-
         .recent-auto-image {
             width: 100%;
             height: 150px;
@@ -178,33 +188,24 @@
         }
         .link {
             display: flex;
-            justify-content: center; /* Центрируем содержимое по горизонтали */
-            align-items: center;     /* Центрируем содержимое по вертикали */
-            height: 100px;           /* Высота контейнера */
-            margin-top: 20px;        /* Отступ сверху */
+            justify-content: center; 
+            align-items: center;     
+            height: 100px;           
+            margin-top: 20px;        
         }
-
-        /* Стили для ссылки */
         .link a {
-            text-decoration: none;        /* Убираем подчеркивание */
-            font-size: 18px;              /* Размер шрифта */
-            color: #ff2200;               /* Цвет текста */
-            font-weight: bold;            /* Жирный шрифт */
-            padding: 10px 20px;           /* Отступы внутри ссылки */
-            border: 2px solid #ff2a00;    /* Граница вокруг ссылки */
-            border-radius: 5px;           /* Скругленные углы */
-            transition: background-color 0.3s, color 0.3s; /* Плавный переход */
-        }
-
-        /* Стили для эффекта наведения */
-        .link a:hover {
-            background-color: #007BFF;
-            color: white;
+            font-size: 18px;              
+            color: #2c01c8;              
+            font-weight: bold;           
+            padding: 10px 20px;           
+            border: 2px solid #2c01c8;    
+            border-radius: 5px;          
+            transition: background-color 0.3s, color 0.3s; 
         }
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
+            margin: 40;
+            padding: 40;
         }
         h1, h2 {
             background-color: #f4f4f4;
@@ -217,7 +218,7 @@
             max-width: 1200px;
         }
         .navbar {
-            background-color: #007BFF;
+            background-color: #01787c;
             padding: 10px;
             color: white;
             display: flex;
@@ -259,14 +260,82 @@
         .contact-form-container form div {
             margin-bottom: 15px;
         }
+        .navbar-menu {
+            margin: 0;
+            padding: 0;
+            display: inline-flex; /* горизонтальное расположение элементов */
+        }
+        .back-link {
+            text-align: center;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .nav-menu li {
+            margin-right: 20px; /* отступы между пунктами */
+        }
+        .nav-menu a {
+            text-decoration: none; /* убираем подчеркивание */
+            color: white; /* белый цвет текста */
+            font-size: 18px; /* размер шрифта */
+            font-weight: bold; /* жирный шрифт */
+            padding: 10px 15px; /* отступы внутри ссылок */
+            border-radius: 5px; /* закругленные углы */
+            transition: background-color 0.3s ease; /* плавный переход при наведении */
+        }
+        button-container {
+            display: flex;
+            gap: 10px; /* Добавляет отступ между кнопками */
+            align-items: center; /* Выравнивание кнопок по центру по вертикали */
+        }
+
+        /* Общие стили для всех кнопок */
+        button {
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        /* Стиль кнопки "Редактировать" */
+        button.edit-btn {
+            background-color: #4CAF50; /* Зеленый цвет */
+            color: white;
+        }
+
+        button.edit-btn:hover {
+            background-color: #45a049; /* Немного темнее зеленый при наведении */
+        }
+
+        /* Стиль кнопки "Удалить" */
+        button.delete-btn {
+            background-color: #f44336; /* Красный цвет */
+            color: white;
+        }
+
+        button.delete-btn:hover {
+            background-color: #e53935; /* Немного темнее красный при наведении */
+        }
     </style>
 </head>
 <body>
     <div class="navbar">
+        <ul>
+            
+            <li><a href="{% url 'index' %}">ГЛАВНАЯ</a></li>
+            <li><a href="{% url 'news_list' %}">НОВОСТИ</a></li>
+            <li><a href="{% url 'search_autos' %}">ПОИСК АВТОМОБИЛЯ</a></li>
+            <li><a href="{% url 'add_auto' %}">ПОДАТЬ ОБЪЯВЛЕНИЕ</a></li>
+            <li><a href="{% url 'auto_list' %}">ВСЕ АВТОМОБИЛИ</a></li>
+        </ul>
         <div>avto.ru</div>
         <div>
             {% if user.is_authenticated %}
-                Здравствуйте, {{ user.first_name }}!
+                Здравствуйте, {{ user.first_name|default:user.username }}!
+                <!-- здесь мы используем фильтр default, чтобы если поле first_name пустое или не заполнено, 
+                вместо этого отображалось имя пользователя, то есть логин (username) -->
                 <a href="{% url 'account_logout' %}">(Выйти)</a>
             {% else %}
                 <a href="{% url 'account_login' %}">Войти</a> | 
@@ -282,14 +351,14 @@
     <footer>
 
         <div class="contact-form-container">
-            <h3>Связаться с нами</h3>
+            <h3 style="color: #2c01c8">Связаться с нами</h3>
             <form method="post" enctype="multipart/form-data" action="{% url 'index' %}">
                 {% csrf_token %}
                 {% for field in form %}
                     <div class="form-group">
                         {{ field.label_tag }}
                         {{ field }}
-                        <div style="color: red;">{{ field.errors }}</div>
+                        <div style="color: #2c01c8">{{ field.errors }}</div>
                     </div>
                 {% endfor %}
                 <button type="submit">Отправить</button>

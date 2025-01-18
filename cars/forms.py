@@ -2,6 +2,7 @@ from django import forms
 from .models import ContactMessage
 import re
 from datetime import datetime
+from cars.models import Auto
 
 class ContactForm(forms.ModelForm):
     message = forms.CharField(
@@ -69,3 +70,39 @@ class ContactForm(forms.ModelForm):
             contact_message.save()  # сохраняем объект в базу данных
 
         return contact_message
+
+class AutoEditForm(forms.ModelForm):
+    class Meta:
+        model = Auto
+        fields = ['brand', 'model', 'year', 'price', 'description']  # можно включить только основные поля
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }
+
+class AutoForm(forms.ModelForm):
+    class Meta:
+        model = Auto
+        fields = [
+            'brand', 'description', 'model', 'year', 'mileage', 'price',
+            'body_type', 'engine_type', 'color', 'region', 'sell_status'
+        ]
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Описание автомобиля'}),
+            'model': forms.TextInput(attrs={'placeholder': 'Модель'}),
+            'year': forms.NumberInput(attrs={'placeholder': 'Год выпуска'}),
+            'mileage': forms.NumberInput(attrs={'placeholder': 'Пробег'}),
+            'price': forms.NumberInput(attrs={'placeholder': 'Цена'}),
+        }
+        labels = {
+            'brand': 'Марка',
+            'description': 'Описание',
+            'model': 'Модель',
+            'year': 'Год выпуска',
+            'mileage': 'Пробег',
+            'price': 'Цена',
+            'body_type': 'Тип кузова',
+            'engine_type': 'Тип двигателя',
+            'color': 'Цвет',
+            'region': 'Регион',
+            'sell_status': 'Статус продажи',
+        }

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Список автомобилей{% endblock %}
+
+{% block content %}
+    <h1>Список автомобилей</h1>
+    <div class="autos-list">
+        {% for auto in autos %}
+            <div class="auto-item">
+                <h3>{{ auto.brand.name }} {{ auto.model }}</h3>
+                <p>Год выпуска: {{ auto.year }}</p>
+                <p>Цена: {{ auto.price|floatformat:0 }} ₽</p>
+                <p>Местоположение: {{ auto.region.name }}</p>
+                <div>
+                    <a href="{% url 'edit_auto' auto.id %}">
+                        <button class="edit-btn">Редактировать</button>
+                    </a>
+                    <form action="{% url 'delete_auto' auto.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="delete-btn">Удалить</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

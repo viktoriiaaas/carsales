@@ -166,16 +166,15 @@ LOGGING = {
     },
 }
 # настройка redis
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://localhost:6379/1",  # URL Redis-сервера
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
-        "KEY_PREFIX": "autos",  # уникальный префикс для ключей в Redis
-    }
-}
+#CACHES = {
+#    "default": {
+#        "BACKEND": "django_redis.cache.RedisCache",
+#        "LOCATION": "redis://localhost:6379/1",  # URL Redis-сервера
+#        "OPTIONS": {
+#            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#        },
+#        "KEY_PREFIX": "autos",  # уникальный префикс для ключей в Redis
+#}
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'localhost'
@@ -217,8 +216,16 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+    }
+}
+
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  
-SESSION_COOKIE_AGE = 900 
+SESSION_COOKIE_AGE = 9000
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True 
 
 INTERNAL_IPS = [

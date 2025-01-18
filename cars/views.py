@@ -14,13 +14,15 @@ from rest_framework.generics import ListAPIView
 from django.http import HttpResponse
 from cars.models import Auto, AutoPhoto, Brand, BodyType, EngineType, Color, Region, SellStatus, Profile
 from cars.serializers import AutoSerializer, BrandSerializer, ProfileSerializer
-
+from news.models import New
 from django.core.cache import cache
 #для форм
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from .forms import ContactForm
-
+from .forms import AutoEditForm
+from .forms import AutoForm
+from django.contrib.auth.decorators import login_required
 
 class AutoFilterAPIView(generics.ListAPIView):
     """
@@ -78,23 +80,24 @@ def index(request):
         {"auto": auto, "photos": AutoPhoto.objects.filter(auto=auto)}
         for auto in autos_page
     ]
-
+    latest_news = New.objects.all().order_by('-created_at')[:2]  
+    # получаем новости, отсортированные по дате создания, ограничиваем 2 новостями
     return render(request, 'index.html', {
         'autos_with_photos': autos_with_photos,
         'autos_page': autos_page,
         'autos': autos, 
+        'latest_news': latest_news,
     })
 
 def auto_detail(request, pk):
-    print(f"Запрос от пользователя: {request.user}")
+
     auto = get_object_or_404(Auto, pk=pk)
-    return JsonResponse({
-        "id": auto.id,
-        "brand": auto.brand.name,
-        "model": auto.model,
-        "year": auto.year,
-        "price": float(auto.price),
-        "description": auto.description,
+
+    photos = auto.auto_photos.all()
+
+    return render(request, 'auto_detail.html', {
+        'auto': auto,
+        'photos': photos
     })
 
 def auto_create(request):
@@ -112,11 +115,11 @@ def auto_create(request):
         return HttpResponseNotAllowed(['POST'])
 
 def search_autos(request):
-    query = request.GET.get('q')  # Получаем поисковый запрос из URL
+    query = request.GET.get('q')  # получаем поисковый запрос из URL
     results = []
 
     if query:
-        # Выполняем поиск по модели, бренду и описанию автомобиля
+        # выполняем поиск по модели, бренду и описанию автомобиля
         results = Auto.objects.filter(
             Q(brand__name__icontains=query) |
             Q(model__icontains=query) |
@@ -405,3 +408,53 @@ def contact_view(request):
 def test_view(request):
     autos = Auto.objects.all()
     return render(request, 'test_template.html', {'autos_with_photos': autos})
+
+def auto_list(request):
+    autos = Auto.objects.all() 
+    return render(request, 'cars/autos_list.html', {'autos': autos})
+
+def edit_auto(request, pk):
+    auto = get_object_or_404(Auto, pk=pk)
+
+    if request.method == 'POST':
+        form = AutoForm(request.POST, instance=auto)
+        if form.is_valid():
+            form.save()
+            return redirect('auto_list')
+    else:
+        form = AutoForm(instance=auto)
+
+    return render(request, 'cars/edit_auto.html', {'form': form, 'auto': auto})
+
+def delete_auto(request, pk):
+    auto = get_object_or_404(Auto, pk=pk)
+
+    if request.method == 'POST':
+        auto.delete()
+        return redirect('auto_list')
+
+    return render(request, 'cars/delete_auto.html', {'auto': auto})
+
+@login_required
+def add_auto(request):
+    if request.method == "POST":
+        form = AutoForm(request.POST, request.FILES)
+        if form.is_valid():
+            auto = form.save(commit=False)
+
+            try:
+                # получаем профиль текущего пользователя
+                profile = request.user.profile  # Получаем профиль пользователя из связанного User
+
+                # привязываем профиль к автомобилю
+                auto.profile = profile  
+                auto.save()  # Сохраняем автомобиль
+
+                return redirect('auto_list')  # перенаправляем на страницу с перечнем автомобилей
+            except Profile.DoesNotExist:
+                # обработка случая, если профиль не найден (это может быть редкий случай)
+                return render(request, 'error_page.html', {'message': 'Профиль пользователя не найден.'})
+    else:
+        form = AutoForm()
+
+    return render(request, 'cars/add_auto.html', {'form': form})
