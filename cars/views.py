@@ -15,12 +15,10 @@ from django.http import HttpResponse
 from cars.models import Auto, AutoPhoto, Brand, BodyType, EngineType, Color, Region, SellStatus, Profile
 from cars.serializers import AutoSerializer, BrandSerializer, ProfileSerializer
 from news.models import New
-from django.core.cache import cache
 #для форм
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from .forms import ContactForm
-from .forms import AutoEditForm
 from .forms import AutoForm, AutoPhotoForm
 from django.contrib.auth.decorators import login_required
 
@@ -427,15 +425,15 @@ def edit_auto(request, pk):
     return render(request, 'cars/edit_auto.html', {'form': form, 'auto': auto})
 
 def delete_auto(request, pk):
-    # Получаем объект автомобиля по pk
+    # получаем объект автомобиля по pk
     auto = get_object_or_404(Auto, pk=pk)
     
-    # Проверка, что автомобиль принадлежит текущему пользователю
+    # проверка, что автомобиль принадлежит текущему пользователю
     if auto.profile == request.user.profile:
-        auto.delete()  # Удаляем объект из базы данных
-        return redirect('auto_list')  # Перенаправляем на страницу со списком автомобилей
+        auto.delete()  # удаляем объект из базы данных
+        return redirect('auto_list')  # перенаправляем на страницу со списком автомобилей
     else:
-        return redirect('auto_list')  # Перенаправляем в случае, если автомобиль не принадлежит пользователю
+        return redirect('auto_list')
     
 def add_auto(request):
     if request.method == 'POST':

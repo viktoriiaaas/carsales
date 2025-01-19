@@ -71,14 +71,6 @@ class ContactForm(forms.ModelForm):
 
         return contact_message
 
-class AutoEditForm(forms.ModelForm):
-    class Meta:
-        model = Auto
-        fields = ['brand', 'model', 'year', 'price', 'description']  # можно включить только основные поля
-        widgets = {
-            'description': forms.Textarea(attrs={'rows': 3}),
-        }
-
 class AutoForm(forms.ModelForm):
     class Meta:
         model = Auto
@@ -110,4 +102,4 @@ class AutoForm(forms.ModelForm):
 class AutoPhotoForm(forms.ModelForm):
     class Meta:
         model = Photo
-        fields = ['url', 'description']  # Предположим, что поле 'url' это ссылка на изображение
+        fields = ['url', 'description']
