@@ -21,7 +21,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from .forms import ContactForm
 from .forms import AutoEditForm
-from .forms import AutoForm
+from .forms import AutoForm, AutoPhotoForm
 from django.contrib.auth.decorators import login_required
 
 class AutoFilterAPIView(generics.ListAPIView):
@@ -435,26 +435,27 @@ def delete_auto(request, pk):
 
     return render(request, 'cars/delete_auto.html', {'auto': auto})
 
-@login_required
 def add_auto(request):
-    if request.method == "POST":
-        form = AutoForm(request.POST, request.FILES)
-        if form.is_valid():
-            auto = form.save(commit=False)
+    if request.method == 'POST':
+        auto_form = AutoForm(request.POST, request.FILES)
+        photo_form = AutoPhotoForm(request.POST, request.FILES)
+        
+        if auto_form.is_valid() and photo_form.is_valid():
+            # cохраняем данные автомобиля
+            auto = auto_form.save(commit=False)
+            auto.profile = request.user.profile  # привязываем профиль текущего пользователя
+            auto.save()  # cохраняем объект автомобиля в базе данных
 
-            try:
-                # получаем профиль текущего пользователя
-                profile = request.user.profile  # Получаем профиль пользователя из связанного User
+            # cохраняем фотографию
+            photo = photo_form.save(commit=False)
+            photo.save()  # cохраняем фото в базе данных
 
-                # привязываем профиль к автомобилю
-                auto.profile = profile  
-                auto.save()  # Сохраняем автомобиль
+            # cоздаем связь между автомобилем и фотографией
+            AutoPhoto.objects.create(auto=auto, photo=photo)
 
-                return redirect('auto_list')  # перенаправляем на страницу с перечнем автомобилей
-            except Profile.DoesNotExist:
-                # обработка случая, если профиль не найден (это может быть редкий случай)
-                return render(request, 'error_page.html', {'message': 'Профиль пользователя не найден.'})
+            return redirect(auto.get_absolute_url())
     else:
-        form = AutoForm()
+        auto_form = AutoForm()
+        photo_form = AutoPhotoForm()
 
-    return render(request, 'cars/add_auto.html', {'form': form})
+    return render(request, 'cars/add_auto.html', {'auto_form': auto_form, 'photo_form': photo_form})

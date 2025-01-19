@@ -2,7 +2,7 @@ from django import forms
 from .models import ContactMessage
 import re
 from datetime import datetime
-from cars.models import Auto
+from cars.models import Auto, AutoPhoto, Photo
 
 class ContactForm(forms.ModelForm):
     message = forms.CharField(
@@ -106,3 +106,8 @@ class AutoForm(forms.ModelForm):
             'region': 'Регион',
             'sell_status': 'Статус продажи',
         }
+
+class AutoPhotoForm(forms.ModelForm):
+    class Meta:
+        model = Photo
+        fields = ['url', 'description']  # Предположим, что поле 'url' это ссылка на изображение

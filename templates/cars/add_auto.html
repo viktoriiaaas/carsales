@@ -52,10 +52,16 @@
 <body>
     <div class="container">
         <h1>ПОДАЙТЕ ОБЪЯВЛЕНИЕ</h1>
-        <form method="post" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Добавить</button>
+            
+            <h2>Добавить новый автомобиль</h2>
+            {{ auto_form.as_p }}
+            
+            <h2>Добавить фотографию</h2>
+            {{ photo_form.as_p }}
+            
+            <button type="submit">Добавить автомобиль</button>
         </form>
     </div>
 </body>

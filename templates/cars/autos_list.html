@@ -17,7 +17,7 @@
                     </a>
                     <form action="{% url 'delete_auto' auto.id %}" method="post">
                         {% csrf_token %}
-                        <button type="submit" class="delete-btn">Удалить</button>
+                        <button type="submit" class="delete-btn" onclick="return confirm('Вы уверены, что хотите удалить этот автомобиль?')">Удалить</button>
                     </form>
                 </div>
             </div>
