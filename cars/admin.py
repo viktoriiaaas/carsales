@@ -57,8 +57,8 @@ class AutoAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = AutoResource
     formats = [XLS]
     
-    list_display = ('id', 'brand', 'model', 'description', 'year', 'price', 'profile', 'sell_status', 'display_mileage')
-    list_display_links = ('model', 'description')
+    list_display = ('id', 'brand', 'model', 'year', 'price', 'profile', 'sell_status', 'display_mileage')
+    list_display_links = ('model', 'brand')
     search_fields = ('brand__name', 'model', 'profile__username', 'sell_status__name')
     list_filter = ('brand', 'year', 'sell_status')
     fieldsets = (
@@ -72,10 +72,13 @@ class AutoAdmin(ExportMixin, admin.ModelAdmin):
     inlines = [AutoPhotoInline]
     raw_id_fields = ['brand', 'profile']
     readonly_fields = ('id',)
+    
     # собственный метод
     @admin.display(description='Пробег в километрах')  # устанавливаем заголовок для колонки
     def display_mileage(self, obj):
         return f"{obj.mileage:,} км"  # форматируем пробег с разделителями
+    
+    display_mileage.short_description = 'Пробег (км)'
 
 # управление autoPhoto
 class AutoPhotoAdmin(admin.ModelAdmin):

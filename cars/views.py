@@ -427,14 +427,16 @@ def edit_auto(request, pk):
     return render(request, 'cars/edit_auto.html', {'form': form, 'auto': auto})
 
 def delete_auto(request, pk):
+    # Получаем объект автомобиля по pk
     auto = get_object_or_404(Auto, pk=pk)
-
-    if request.method == 'POST':
-        auto.delete()
-        return redirect('auto_list')
-
-    return render(request, 'cars/delete_auto.html', {'auto': auto})
-
+    
+    # Проверка, что автомобиль принадлежит текущему пользователю
+    if auto.profile == request.user.profile:
+        auto.delete()  # Удаляем объект из базы данных
+        return redirect('auto_list')  # Перенаправляем на страницу со списком автомобилей
+    else:
+        return redirect('auto_list')  # Перенаправляем в случае, если автомобиль не принадлежит пользователю
+    
 def add_auto(request):
     if request.method == 'POST':
         auto_form = AutoForm(request.POST, request.FILES)
